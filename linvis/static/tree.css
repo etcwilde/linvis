@@ -1,0 +1,24 @@
+.bubble_node {
+	cursor: pointer;
+}
+
+.bubble_node:hover {
+	stroke: #000;
+	stroke-width: 1.5px;
+}
+
+.bubble_node--leaf {
+	fill: white;
+}
+
+.bubble_label {
+	font: 11px "Helvetica Neue", Helvetica, Arial, sans-serif;
+	text-anchor: middle;
+	text-shadow: 0 1px 0 #fff, 1px 0 0 @fff, -1px 0 0 #fff, 0 -1px 0 #fff;
+}
+
+.bubble_label,
+.bubble_node--root,
+.bubble_node--leaf {
+	pointer-events: none;
+}

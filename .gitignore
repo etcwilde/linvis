@@ -1,0 +1,14 @@
+# Virtual Environment Directories
+bin/
+lib/
+include/
+
+# Python Directories
+__pycache__/
+.ropeproject/
+
+# Pip
+pip-selfcheck.json
+
+# Vim Generated Files
+*.sw*

@@ -1,0 +1,37 @@
+{% extends "heading.html" %}
+
+{% block head %}
+<script src="/static/commit_page_state.js"></script>
+{% if breadcrumbs %}
+<style> body{padding-top: 125px;}</style>
+<script>crumbs={{breadcrumbs|tojson|safe}}</script>
+{% endif %}
+{% endblock %}
+
+{% block navbar %}
+{% if breadcrumbs %}
+	<ol class="breadcrumb">
+		{% for crumb in breadcrumbs %}
+		<li><a href="/commits/{{crumb}}">{{crumb}}</a></li>
+		{% endfor %}
+	</ol>
+{% endif %}
+{% endblock %}
+
+{% block body %}
+<div class="jumbotron">
+	{% if preview %}<div class="container"><h2>{{preview}}</h2></div>{% endif %}
+	<div class="container-fluid container">
+		<div class="panel-heading">
+			<ul class="nav nav-tabs" role="tablist">
+				<li id="0" role="presentation"><a>Message</a></li>
+				<li id="1" role="presentation"><a>Files</a></li>
+				<li id="2" role="presentation"><a>Modules</a></li>
+				<li id="3" role="presentation"><a>Tree</a></li>
+			</ul>
+		</div>
+		<div id="content" class="panel-body"></div>
+	</div>
+</div>
+{% endblock %}
+

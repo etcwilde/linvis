@@ -1,0 +1,49 @@
+.spinner {
+  margin: 100px auto 0;
+  width: 100px;
+  text-align: center;
+}
+
+.spinner > div {
+  width: 16px;
+  height: 16px;
+  background-color:#3382DB;
+  border-radius: 100%;
+  display: inline-block;
+  animation: sk-bouncedelay 1.5s infinite cubic-bezier(0.74,0.01,0.44,0.74) both;
+  margin-right: 5px;
+}
+
+.spinner--orange > div {
+  background: #FF9A27;
+}
+
+.spinner--cyan > div {
+  background: #3FCCA1;
+}
+
+.spinner--yellow > div {
+  background: #F2D915;
+}
+
+.spinner .spinner__item1 {
+  animation-delay: -0.60s;
+}
+
+.spinner .spinner__item2 {
+  animation-delay: -0.40s;
+}
+
+.spinner .spinner__item3 {
+  animation-delay: -0.20s;
+}
+
+@keyframes sk-bouncedelay {
+  0%, 80%, 100% { 
+    transform: scale(0);
+    opacity: 0;
+  } 40% { 
+    transform: scale(1.0);
+    opacity: 1;
+  }
+}
