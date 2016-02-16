@@ -4,7 +4,7 @@ var b_modules_loaded = false;
 var b_files_loaded = false;
 var b_tree_loaded = false;
 
-var b_listview = true;
+var b_listview = 0;
 
 var authors = [];
 var modules = [];
@@ -87,18 +87,32 @@ function build_list_tree(base, root) {
 	}
 }
 
-function buildTree(base) {
-	if (b_listview)
-	{
-		base.html($("<ul></ul>", {"id": "list_tree"}));
-		build_list_tree($('#list_tree'), tree_base);
-	}
-	else
-	{
-		base.html('Not Implemented');
-	}
-
+function buildPackTree(base)
+{
+    
 }
+
+
+function buildTree(base) {
+    switch(b_listview)
+    {
+        case 0:
+            base.html($("<ul></ul>", {"id": "list_tree"}));
+            build_list_tree($('#list_tree'), tree_base);
+            break;
+        case 1:
+            base.html($("<div></div>", {"class": "alert alert-warning", "role": "alert"})
+                    .append($("<span></span>", {"class": "glyphicon glyphicon-exclamation-sign", "aria-hidden": "true"}))
+                    .html("Not Yet Implemented"));
+            break;
+        default:
+            base.html($("<div></div>", {"class": "alert alert-danger", "role": "alert"})
+                    .append($("<span></span>", {"class": "glyphicon glyphicon-exclamation-sign", "aria-hidden": "true"}))
+                    .html("Inavlid Tree Selector"));
+            break;
+    }
+}
+
 
 function getTree() {
 	$.get("/data/tree/JSON/" + cid, function(data) {
@@ -112,9 +126,36 @@ function getTree() {
 		tree_base = root;
 	})
 	.success(function() {
-		console.log("Tree Collected");
-		b_tree_loaded = true;
-		buildTree($('#content'));
+        $('#content').html("");
+        // Header
+        var treeNav =
+            $("<div></div>", {"id": "treeNav", "class": "navbar navbar-default"})
+                .append($("<form></form>", {"id": "tree-selector", "role": "form"})
+                .append(
+                        $("<label></label>", {"class": "radio-inline"})
+                        .append($("<input/>", {"type": "radio", "name": "treeSelect", "value": "list"}))
+                        .append("List Tree"))
+                .append(
+                        $("<label></label>", {"class": "radio-inline"})
+                        .append($("<input/>", {"type": "radio", "name": "treeSelect", "value": "pack"}))
+                        .append("Pack Tree")));
+        var treeView = $("<div></div>", {"id": "treeView", "class": "container"});
+        $('#content').append(treeNav);
+        $('#content').append(treeView);
+        $("#tree-selector")
+            .on("change", function()
+                    {
+                        switch($('input[name=treeSelect]:checked', '#tree-selector').val())
+                        {
+                            case 'pack':
+                                b_listview = 1;
+                                break;
+                            default:
+                                b_listview = 0
+
+                        }
+                        buildTree($('#treeView'));
+                    });
 	});
 };
 
@@ -168,7 +209,7 @@ function getModules() {
 // Initialize
 $(document).ready( function() {
 	// Found it!
-	$.get("/data/log/"+cid,function(data){message=data;});
+    if(cid) $.get("/data/log/"+cid,function(data){message=data;});
 	b_message_loaded = true;
 
 	$("li[id=0]").click(function() {
