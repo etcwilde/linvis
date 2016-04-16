@@ -47,8 +47,7 @@ function getFiles() {
 					tmp_files[firewood[log_tag].files[i][0]].removed += firewood[log_tag].files[i][2];
 					tmp_files[firewood[log_tag].files[i][0]].cids.push(log_tag);
 				} else {
-					if (firewood[log_tag].files[i][0] === null)
-						continue;
+					if (firewood[log_tag].files[i][0] === null) continue;
 					tmp_files[firewood[log_tag].files[i][0]] = {
 						'filename': firewood[log_tag].files[i][0],
 						'added': firewood[log_tag].files[i][1],
@@ -71,26 +70,36 @@ function getFiles() {
 	});
 }
 
+function visit(parent, visitFn)
+{
+    console.log("Visiting");
+    visitFn(parent);
+    if(parent.children != null)
+    {
+        var namelist = Object.keys(parent.children);
+        for (var c in namelist) visit(parent.children[namelist[c]], visitFn);
+    }
+}
+
 // Base is location in DOM
 // root is location in tree
+// TODO: Replace with the visit method
 function build_list_tree(base, root) {
 	var entry = $("<li></li>", {"id": root['cid']})
-		.append($("<a></a>", {"href": '/commits/'+root['cid']})
-				.append(root['name']))
+		.append($("<a></a>", {"href": '/commits/'+root['cid']}).append(root['name']))
 		.appendTo(base);
-	if (root['children'] != null) {
+    if (root.children != null){
 		var sublist = $("<ul></ul>");
-		var namelist = Object.keys(root['children']);
-		for (var c in namelist)
-			build_list_tree(sublist, root['children'][namelist[c]]);
+		var namelist = Object.keys(root.children);
+		for (var c in namelist)build_list_tree(sublist,root['children'][namelist[c]]);
 		entry.append(sublist);
 	}
 }
 
 function buildPackTree(base)
 {
-    
 }
+
 
 
 function buildTree(base) {
@@ -101,9 +110,10 @@ function buildTree(base) {
             build_list_tree($('#list_tree'), tree_base);
             break;
         case 1:
-            base.html($("<div></div>", {"class": "alert alert-warning", "role": "alert"})
-                    .append($("<span></span>", {"class": "glyphicon glyphicon-exclamation-sign", "aria-hidden": "true"}))
-                    .html("Not Yet Implemented"));
+            buildPackTree(base);
+            //base.html($("<div></div>", {"class": "alert alert-warning", "role": "alert"})
+            //        .append($("<span></span>", {"class": "glyphicon glyphicon-exclamation-sign", "aria-hidden": "true"}))
+            //        .html("Not Yet Implemented"));
             break;
         default:
             base.html($("<div></div>", {"class": "alert alert-danger", "role": "alert"})
@@ -112,7 +122,6 @@ function buildTree(base) {
             break;
     }
 }
-
 
 function getTree() {
 	$.get("/data/tree/JSON/" + cid, function(data) {

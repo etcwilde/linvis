@@ -1,0 +1,155 @@
+{% extends "heading.html" %}
+
+{% block head %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.13/d3.min.js"></script>
+
+<style>
+.node {
+    cursor: pointer;
+}
+
+.node:hover {
+    stroke: #000;
+    stroke-width: 1.5px;
+}
+
+.label {
+    font: 13px "Helvetica Neue", Helvetica, Arial, sans-serif;
+        text-anchor: middle;
+        text-shadow: 0 1px 0 #fff, 1px 0 0 #fff, -1px 0 0 #fff, 0 -1px 0 #fff;
+}
+
+.label,
+.node--root,
+{
+    pointer-events: none;
+}
+
+
+</style>
+{% endblock %}
+
+{% block body %}
+
+<div id="treePreview" class="container">
+</div>
+
+<div id="treeView" class="container">
+</div>
+
+
+<script>
+
+console.log("Width: " + $("#treeView").width());
+console.log("Height: " + $("#treeView").height());
+
+var margin = 5,
+    diameter = $("#treeView").width() / 2;
+
+var color = d3.scale.linear()
+    .domain([-1, 10])
+    //.range(["hsl(200, 66%, 85%)", "hsl(220, 74%, 85%)"])
+    // .range(["hsl[216, 74%, 85%)", "hsl(181, 40%, 96%)"])
+    .range(["hsl(200,80%,80%)", "hsl(260,30%,40%)"])
+    .interpolate(d3.interpolateHcl);
+
+var pack = d3.layout.pack()
+    .padding(5)
+    .size([diameter - margin, diameter - margin])
+    .value(function(d) {
+        if (d.children != null) return d.children.length + 5;
+        else return 5; });
+
+var cid = "c267548755a184ef97301071300c1739a564e135";
+//d3.json("http://localhost:8080/data/tree/JSON/3ab2e420ec1caf4ead233f3161ac7d86fe5d2a9f", function(error, tree) {
+//d3.json("http://localhost:8080/data/tree/JSON/73287a43cc79ca06629a88d1a199cd283f42456a", function(error, tree) {
+//d3.json("http://localhost:8080/data/tree/JSON/042dd60ca6dec9a02cefa8edd67de386e35755d6", function(error, tree) {
+var svg = d3.select("#treeView").append("svg")
+    .attr("width", diameter)
+    .attr("height", diameter)
+  .append("g")
+    .attr("transform", "translate(" + diameter / 2 + "," + diameter / 2 + ")");
+        d3.json("http://localhost:8080/data/tree/JSON/" + cid, function(error, tree) {
+    if (error) throw error;
+    // unpack tree
+    // Basically want a visit method that massages the data into something nice
+    var thisCommit;
+    function breakTree(inputTree) // Do it with recursion first
+    {
+        var retObject = {}
+        retObject.author = inputTree.author;
+        retObject.cid = inputTree.cid;
+        retObject.name = inputTree.name;
+        if (retObject.cid == cid) thisCommit = retObject;
+        if (inputTree.children != null)
+        {
+            retObject.children = [];
+            $.each(inputTree.children, function(index, value) {
+                retObject.children.push(breakTree(value));
+            });
+        }
+        return retObject;
+    }
+
+    var root = breakTree(tree);
+    var focus = thisCommit,
+    nodes = pack.nodes(root),
+    view;
+    var circle = svg.selectAll("circle")
+        .data(nodes)
+        .enter()
+        .append("g")
+        .append("circle")
+        .attr("class", function(d) { return d.parent ? d.children ? "node" : "node" : "node node--root"; })
+        .style("fill", function(d) { return d === thisCommit ? "red" : d.children ?  color(d.depth) : "white"; })
+        .on("click", function(d) { if (focus !== d) zoom(d), d3.event.stopPropagation(); })
+        .on("mouseover", function(d) { updatePreview(d); })
+        .on("mouseleave", function(d) { updatePreview(focus); });
+
+    function updatePreview(d)
+    {
+        $("#treePreview").html("")
+        $("#treePreview")
+            .show()
+            .append($("<p></p>").html($("<a></a>", {"href": "/commits/" + d.cid}).html(d.name)))
+            .append($("<p></p>").html(d.author));
+    }
+
+    updatePreview(focus);
+    var node = svg.selectAll("circle");
+    d3.select("#treeView").on("click", function() { zoom(root); });
+    zoomTo([focus.x, focus.y, focus.r * 2 + margin]);
+    function zoom(d) {
+        var focus0 = focus; focus = d;
+        updatePreview(focus);
+        var transition = d3.transition()
+            .duration(d3.event.altKey ? 7500 : 750)
+            .tween("zoom", function(d) {
+                var i = d3.interpolateZoom(view, [focus.x, focus.y, focus.r * 2 + margin]);
+                return function(t) { zoomTo(i(t)); };
+            });
+        //transition.selectAll("text")
+        //    .filter(function(d) { return d === focus || d.parent === focus || d === focus0; })
+        //    .each("start", function(d) { this.style.display = "inline"; })
+        //    .each("end", function(d) { this.style.display = d === focus ? "inline" : "none"; })
+        //    .style("fill-opacity", function(d) { return d === focus ? "1.0": "0.5"; })
+        //    .style("display", function(d) { return d === focus ? "inline" : "none";});
+    }
+
+    function zoomTo(v) {
+        var k = diameter / v[2]; view = v;
+        node.attr("transform", function(d) { return "translate(" + (d.x - v[0]) * k + "," + (d.y - v[1]) * k + ")"; });
+        circle.attr("r", function(d) { return d.r * k; });
+    }
+});
+d3.select(self.frameElement).style("height", diameter + "px");
+</script>
+
+
+
+{% endblock %}
+
+{% block tail %}
+<script src="/static/bubble_tree.js"></script>
+{% endblock %}
+

@@ -131,6 +131,11 @@ def search():
                                version=ver)
 
 
+@app.route('/test')
+def test_page():
+    return render_template("test.html")
+
+
 @app.route('/')
 def index():
     return redirect(url_for('search'))
