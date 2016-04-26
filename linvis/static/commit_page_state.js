@@ -72,7 +72,6 @@ function getFiles() {
 
 // Base is location in DOM
 // root is location in tree
-// TODO: Replace with the visit method
 function build_list_tree(base, root) {
   var entry = $("<li></li>", {"id": root['cid']})
     .append($("<a></a>", {"href": '/commits/'+root['cid']}).append(root['name']))
@@ -99,6 +98,102 @@ function build_tree() {
     $('#content').html("<ul></ul>", {"id": "list_tree"});
     build_list_tree($('#content'), tree_base);
   });
+}
+
+function build_bubble() {
+
+  var tree_preview_node = $("<div></div>", {"id": "treePreview", "class": "container"});
+  var tree_view_node = $("<div></div>", {"id": "treeView", "class": "container"});
+  $('#content').html('');
+  $('#content').append(tree_preview_node).append(tree_view_node);
+
+  var margin = 5,
+    diameter = $('#content').width() / 2;
+
+  var color = d3.scale.linear()
+    .domain([-1, 10])
+    .range(["hsl(200,80%,80%)", "hsl(260,30%,40%)"])
+    .interpolate(d3.interpolateHcl);
+
+  var pack = d3.layout.pack()
+    .padding(5)
+    .size([diameter - margin, diameter - margin])
+    .value(function(d) {
+      if (d.children != null) return d.children.length + 5;
+      else return 5; });
+
+    var svg = d3.select("#treeView").append("svg")
+      .attr("width", diameter)
+      .attr("height", diameter)
+      .append("g")
+      .attr("transform", "translate(" + diameter / 2 + "," + diameter / 2 + ")");
+    d3.json("http://localhost:8080/data/tree/JSON/" + cid, function(error, tree) {
+      if (error) throw error;
+      // unpack tree
+      // Basically want a visit method that massages the data into something nice
+      var thisCommit;
+      function breakTree(inputTree) // Do it with recursion first
+      {
+        var retObject = {}
+        retObject.author = inputTree.author;
+        retObject.cid = inputTree.cid;
+        retObject.name = inputTree.name;
+        if (retObject.cid == cid) thisCommit = retObject;
+        if (inputTree.children != null)
+          {
+            retObject.children = [];
+            $.each(inputTree.children, function(index, value) {
+              retObject.children.push(breakTree(value));
+            });
+          }
+          return retObject;
+      }
+
+      var root = breakTree(tree);
+      var focus = thisCommit,
+        nodes = pack.nodes(root),
+        view;
+      var circle = svg.selectAll("circle")
+        .data(nodes)
+        .enter()
+        .append("g")
+        .append("circle")
+        .attr("class", function(d) { return d.parent ? d.children ? "node" : "node" : "node node--root"; })
+        .style("fill", function(d) { return d === thisCommit ? "red" : d.children ?  color(d.depth) : "white"; })
+        .on("click", function(d) { if (focus !== d) zoom(d), d3.event.stopPropagation(); })
+        .on("mouseover", function(d) { updatePreview(d); })
+        .on("mouseleave", function(d) { updatePreview(focus); });
+
+      function updatePreview(d)
+      {
+        $("#treePreview").html("")
+        $("#treePreview")
+          .show()
+          .append($("<p></p>").html($("<a></a>", {"href": "/commits/" + d.cid}).html(d.name)))
+          .append($("<p></p>").html(d.author));
+      }
+
+      updatePreview(focus);
+      var node = svg.selectAll("circle");
+      d3.select("#treeView").on("click", function() { zoom(root); });
+      zoomTo([focus.x, focus.y, focus.r * 2 + margin]);
+      function zoom(d) {
+        var focus0 = focus; focus = d;
+        updatePreview(focus);
+        var transition = d3.transition()
+          .duration(d3.event.altKey ? 7500 : 750)
+          .tween("zoom", function(d) {
+            var i = d3.interpolateZoom(view, [focus.x, focus.y, focus.r * 2 + margin]);
+            return function(t) { zoomTo(i(t)); };
+          });
+      }
+      function zoomTo(v) {
+        var k = diameter / v[2]; view = v;
+        node.attr("transform", function(d) { return "translate(" + (d.x - v[0]) * k + "," + (d.y - v[1]) * k + ")"; });
+        circle.attr("r", function(d) { return d.r * k; });
+      }
+    });
+    d3.select(self.frameElement).style("height", diameter + "px");
 }
 
 function getModules() {
@@ -247,9 +342,7 @@ $(document).ready( function() {
                 "<div class='spinner__item2'></div>"+
                 "<div class='spinner__item3'></div>"+
                 "<div class='spinner__item4'></div>");
-        build_tree($('#list_tree'), tree_base);
-
-        //buildTree($('#content'));
+        build_bubble();
         $("li[id=0]").removeClass("active");
         $("li[id=1]").removeClass("active");
         $("li[id=2]").removeClass("active");
