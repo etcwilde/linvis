@@ -127,7 +127,7 @@ function build_bubble() {
       .attr("height", diameter)
       .append("g")
       .attr("transform", "translate(" + diameter / 2 + "," + diameter / 2 + ")");
-    d3.json("http://localhost:8080/data/tree/JSON/" + cid, function(error, tree) {
+    d3.json("/data/tree/JSON/" + cid, function(error, tree) {
       if (error) throw error;
       // unpack tree
       // Basically want a visit method that massages the data into something nice
