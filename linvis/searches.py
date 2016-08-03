@@ -92,6 +92,7 @@ SELECT mcidlinus AS cid FROM pathtomerge GROUP BY mcidlinus) AS a
 WHERE {0}) {1}
 """
 
+
 def gen_comdate_query(req):
     try:
         comdate_begin = \
@@ -103,14 +104,14 @@ def gen_comdate_query(req):
             datetime.strptime(request.args.get('commit_date_end'), "%m/%d/%Y")
     except:
         comdate_end = None
-        begin = None
-        end = None
-        with get_cursor() as cur:
-            cur.execute(q_get_version_date_limits,
-                        {'ver': request.args.get('version')})
-            m = cur.fetchone()
-            if m:
-                begin, end = m
+    begin = None
+    end = None
+    with get_cursor() as cur:
+        cur.execute(q_get_version_date_limits,
+                    {'ver': request.args.get('version')})
+        m = cur.fetchone()
+        if m:
+            begin, end = m
     if not begin:
         begin = comdate_begin
     if not end:
