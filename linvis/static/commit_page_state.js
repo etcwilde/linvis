@@ -4,8 +4,6 @@ var b_modules_loaded = false;
 var b_files_loaded = false;
 var b_tree_loaded = false;
 
-// var b_listview = 0;
-
 var authors = [];
 var modules = [];
 var files = [];
@@ -104,10 +102,6 @@ function build_reingold() {
     $('#content').html('');
     $('#content').append(tree_view_node);
 
-    var totalNodes = 0;
-    var selectedNode = null;
-    // var panSpeed = 200;
-    // var panBoundary = 20;
     var duration = 750;
     var root;
     var levelWidth ;
@@ -125,9 +119,6 @@ function build_reingold() {
             return b.name.toLowerCase() < a.name.toLowerCase() ? 1 : -1;
         });
     }
-    // TODO: Visit tree data to get max label length
-    // TODO: visit tree data to get number of nodes
-    // TODO: sort tree
 
     function zoom() {
         svgGroup.attr("transform",
@@ -161,7 +152,7 @@ function build_reingold() {
         x = (viewerWidth / 2.) + x * scale ;
         y = (viewerHeight/2.)  + y * scale;
         svgGroup.transition()
-            .duration(750)
+            .duration(duration)
             .attr("transform", "translate(" +  x + "," +  y  + ")scale("+scale+")");
         zoomListener.scale(scale);
         zoomListener.translate([x,y]);
@@ -200,7 +191,6 @@ function build_reingold() {
             }
         };
         childCount(0, root);
-        // console.log("Maximum Width: " + d3.max(levelWidth) + " Depth: " +  levelWidth.length);
 
         tree = tree.size([d3.max(levelWidth) * 90, levelWidth.length * 150 + d3.max(levelWidth) * 10]);
 
@@ -209,10 +199,8 @@ function build_reingold() {
             nodes = tree.nodes(root),
             links = tree.links(nodes);
 
-        centerNode(focus);
         sortTree();
-        // Now, figure out how dang big to make the tree
-        // Need maximum depth and maximum level width
+        centerNode(focus);
 
         var link = svgGroup.selectAll(".link")
             .data(links)
@@ -235,7 +223,7 @@ function build_reingold() {
             .attr("transform", function(d) {
                 return "translate(" + d.x + "," + d.y + ")"; })
             .attr("class", function(d) { return d.parent ? d.children ? "node" : "node" : "node node--root"; })
-            .style("fill", function(d) { 
+            .style("fill", function(d) {
                 d.color = d === thisCommit ? "red" : color(d.depth);
                 return d.color;})
             .attr("r", 10);
@@ -417,7 +405,6 @@ $(document).ready( function() {
                 "<div class='spinner__item3'></div>"+
                 "<div class='spinner__item4'></div>");
         if(!b_message_loaded) {
-          console.log("Not loaded");
             $.get("/data/log/"+cid,function(data){message=data;});
             b_message_loaded = true;
         }
