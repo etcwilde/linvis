@@ -4,7 +4,7 @@ var b_modules_loaded = false;
 var b_files_loaded = false;
 var b_tree_loaded = false;
 
-var b_listview = 0;
+// var b_listview = 0;
 
 var authors = [];
 var modules = [];
@@ -86,7 +86,6 @@ function build_list_tree(base, root) {
 
 function build_tree() {
   $.get("/data/tree/JSON/" + cid, function(data) {
-    console.log("Getting: data/tree/JSON/" + cid);
     tree  = jQuery.parseJSON(data);
     var root = tree;
     var remaining_path = crumbs;
@@ -100,8 +99,158 @@ function build_tree() {
   });
 }
 
-function build_bubble() {
+function build_reingold() {
+    var tree_view_node = $("<div></div>", {"id": "treeView", "class": "container"});
+    $('#content').html('');
+    $('#content').append(tree_view_node);
 
+    var totalNodes = 0;
+    var selectedNode = null;
+    // var panSpeed = 200;
+    // var panBoundary = 20;
+    var duration = 750;
+    var root;
+    var levelWidth ;
+
+    var viewerWidth = $('#treeView').width();
+    var viewerHeight = $(document).height();
+
+    var tree = d3.layout.tree();
+
+    var diagonal = d3.svg.diagonal()
+        .projection(function(d) { return [d.x, d.y]; });
+
+    function sortTree() {
+        tree.sort(function(a, b) {
+            return b.name.toLowerCase() < a.name.toLowerCase() ? 1 : -1;
+        });
+    }
+    // TODO: Visit tree data to get max label length
+    // TODO: visit tree data to get number of nodes
+    // TODO: sort tree
+
+    function zoom() {
+        svgGroup.attr("transform",
+        "translate(" + d3.event.translate +
+        ")scale(" + d3.event.scale + ")");
+    }
+
+    function click(d) {
+        if (d3.event.defaultPrevented) return; // Click suppressed
+    }
+
+    var zoomListener = d3.behavior.zoom().scaleExtent([0.1, 3]).on("zoom", zoom);
+
+    var baseSVG = d3.select("#treeView").append("svg")
+        .attr("width", viewerWidth)
+        .attr("height", viewerHeight)
+        .attr("class", "overlay")
+        .call(zoomListener);
+
+    var svgGroup = baseSVG.append('g');
+
+    var color = d3.scale.linear()
+        .domain([-1, 10])
+        .range(["hsl(200, 80%, 80%)", "hsl(260,30%,40%)"])
+        .interpolate(d3.interpolateHcl);
+
+    function centerNode(source) {
+        var scale = zoomListener.scale();
+        x = -source.x;
+        y = -source.y;
+        x = (viewerWidth / 2.) + x * scale ;
+        y = (viewerHeight/2.)  + y * scale;
+        svgGroup.transition()
+            .duration(750)
+            .attr("transform", "translate(" +  x + "," +  y  + ")scale("+scale+")");
+        zoomListener.scale(scale);
+        zoomListener.translate([x,y]);
+    }
+
+
+    d3.json("/data/tree/JSON/" + cid, function(error, t) {
+        if (error) throw error;
+
+        // Extract this commit, convert children objects to arrays
+        var thisCommit;
+        function breakTree(inputTree) {
+            var retObject = {}
+            retObject.author = inputTree.author;
+            retObject.cid = inputTree.cid;
+            retObject.name = inputTree.name;
+            if (retObject.cid == cid) thisCommit = retObject;
+            if (inputTree.children != null)
+            {
+                retObject.children = [];
+                $.each(inputTree.children, function(index, value) {
+                    retObject.children.push(breakTree(value));
+                });
+            }
+            return retObject;
+        }
+
+        var root = breakTree(t);
+
+        levelWidth = [1];
+        var childCount = function(level, n) {
+            if (n.children && n.children.length > 0) {
+                if (levelWidth.length <= level + 1) levelWidth.push(0);
+                levelWidth[level+1] += n.children.length;
+                n.children.forEach(function(d){childCount(levelWidth + 1,d);});
+            }
+        };
+        childCount(0, root);
+        // console.log("Maximum Width: " + d3.max(levelWidth) + " Depth: " +  levelWidth.length);
+
+        tree = tree.size([d3.max(levelWidth) * 90, levelWidth.length * 150 + d3.max(levelWidth) * 10]);
+
+
+        var focus = thisCommit,
+            nodes = tree.nodes(root),
+            links = tree.links(nodes);
+
+        centerNode(focus);
+        sortTree();
+        // Now, figure out how dang big to make the tree
+        // Need maximum depth and maximum level width
+
+        var link = svgGroup.selectAll(".link")
+            .data(links)
+            .enter().append("g")
+            .attr("fill", "none")
+            .append("path")
+            .attr("stroke-width", "1.2")
+            .attr("stroke", "#bbb")
+            .attr("class", "link")
+            .attr("d", diagonal);
+
+        var circle = svgGroup.selectAll("circle")
+            .data(nodes);
+
+        var circleEnter = circle.enter().append("g")
+            .on('click', click);
+
+
+        circleEnter.append("circle")
+            .attr("transform", function(d) {
+                return "translate(" + d.x + "," + d.y + ")"; })
+            .attr("class", function(d) { return d.parent ? d.children ? "node" : "node" : "node node--root"; })
+            .style("fill", function(d) { 
+                d.color = d === thisCommit ? "red" : color(d.depth);
+                return d.color;})
+            .attr("r", 10);
+        // circleEnter.append("text")
+        //     .attr("x", function(d) { return d.x - (d.name.length / 2.) * 8;})
+        //     .attr("y", function(d) { return d.y + 14; })
+        //     .text(function(d) { return d.name; });
+
+        node  = svgGroup.selectAll("g.node");
+    });
+
+
+}
+
+function build_bubble() {
   var tree_preview_node = $("<div></div>", {"id": "treePreview", "class": "container"});
   var tree_view_node = $("<div></div>", {"id": "treeView", "class": "container"});
   $('#content').html('');
@@ -199,7 +348,6 @@ function build_bubble() {
 function getModules() {
     $.get("/data/modules/JSON/" + cid, function(data) {
         modules = [];
-        console.log("data/modules/JSON/" + cid);
         var d = jQuery.parseJSON(data);
         var remaining_items = [jQuery.parseJSON(data)];
         var firewood = {};
@@ -242,6 +390,15 @@ function getModules() {
     });
 }
 
+function resetTabs() {
+    $("li[id=0]").removeClass("active");
+    $("li[id=1]").removeClass("active");
+    $("li[id=2]").removeClass("active");
+    $("li[id=3]").removeClass("active");
+    $("li[id=4]").removeClass("active");
+    $("li[id=5]").removeClass("active");
+}
+
 // Initialize
 $(document).ready( function() {
     // Found it!
@@ -266,10 +423,8 @@ $(document).ready( function() {
         }
         $("#content").html("<pre id=\"log\">");
         $("pre[id='log']").html(message);
+        resetTabs();
         $("li[id=0]").addClass("active");
-        $("li[id=1]").removeClass("active");
-        $("li[id=2]").removeClass("active");
-        $("li[id=3]").removeClass("active");
     });
 
     $("li[id=1]").click(function() {
@@ -289,11 +444,8 @@ $(document).ready( function() {
                 {title: "Added"},
                 {title: "Removed"}]});
         }
-        $("li[id=0]").removeClass("active");
+        resetTabs();
         $("li[id=1]").addClass("active");
-        $("li[id=2]").removeClass("active");
-        $("li[id=3]").removeClass("active");
-        $("li[id=4]").removeClass("active");
     });
     $("li[id=2]").click(function() {
         $("#content").html("<div class='spinner'>"+
@@ -315,11 +467,8 @@ $(document).ready( function() {
                 {title: "Module"},
                 {title: "Count"}]});
         }
-        $("li[id=0]").removeClass("active");
-        $("li[id=1]").removeClass("active");
+        resetTabs();
         $("li[id=2]").addClass("active");
-        $("li[id=3]").removeClass("active");
-        $("li[id=4]").removeClass("active");
     });
     $("li[id=3]").click(function() {
         $("#content").html("<div class='spinner'>" +
@@ -330,11 +479,8 @@ $(document).ready( function() {
         build_tree($('#list_tree'), tree_base);
 
         //buildTree($('#content'));
-        $("li[id=0]").removeClass("active");
-        $("li[id=1]").removeClass("active");
-        $("li[id=2]").removeClass("active");
+        resetTabs();
         $("li[id=3]").addClass("active");
-        $("li[id=4]").removeClass("active");
     });
     $("li[id=4]").click(function() {
         $("#content").html("<div class='spinner'>" +
@@ -343,10 +489,17 @@ $(document).ready( function() {
                 "<div class='spinner__item3'></div>"+
                 "<div class='spinner__item4'></div>");
         build_bubble();
-        $("li[id=0]").removeClass("active");
-        $("li[id=1]").removeClass("active");
-        $("li[id=2]").removeClass("active");
-        $("li[id=3]").removeClass("active");
+        resetTabs();
         $("li[id=4]").addClass("active");
+    });
+    $("li[id=5]").click(function() {
+        $("#content").html("<div class='spinner'>" +
+                           "<div class='spinner__item1'></div>"+
+                           "<div class='spinner__item2'></div>"+
+                           "<div class='spinner__item3'></div>"+
+                           "<div class='spinner__item4'></div>");
+        build_reingold();
+        resetTabs();
+        $("li[id=5]").addClass("active");
     });
 });
