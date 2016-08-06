@@ -98,9 +98,12 @@ function build_tree() {
 }
 
 function build_reingold() {
+    var tree_preview_node = $("<div></div>", {"id": "treePreview", "class": "container"});
     var tree_view_node = $("<div></div>", {"id": "treeView", "class": "container"});
     $('#content').html('');
-    $('#content').append(tree_view_node);
+    $('#content')
+        .append(tree_preview_node)
+        .append(tree_view_node);
 
     var duration = 750;
     var root;
@@ -126,8 +129,20 @@ function build_reingold() {
         ")scale(" + d3.event.scale + ")");
     }
 
+    function updatePreview(d) {
+        $("#treePreview").html("");
+        $("#treePreview")
+            .show()
+            .append($("<p></p>")
+                .html($("<a></a>", {"href": "/commits/" + d.cid}).html(d.name)))
+            .append($("<p></p>").html(d.author));
+    }
+
+
     function click(d) {
         if (d3.event.defaultPrevented) return; // Click suppressed
+        centerNode(d);
+        updatePreview(d);
     }
 
     var zoomListener = d3.behavior.zoom().scaleExtent([0.1, 3]).on("zoom", zoom);
@@ -199,6 +214,8 @@ function build_reingold() {
             nodes = tree.nodes(root),
             links = tree.links(nodes);
 
+        updatePreview(focus);
+
         sortTree();
         centerNode(focus);
 
@@ -208,7 +225,7 @@ function build_reingold() {
             .attr("fill", "none")
             .append("path")
             .attr("stroke-width", "1.2")
-            .attr("stroke", "#bbb")
+            .attr("stroke", "#666")
             .attr("class", "link")
             .attr("d", diagonal);
 
