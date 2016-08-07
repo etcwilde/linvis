@@ -209,6 +209,7 @@ function build_reingold() {
         levelWidth.length * radius * 5 + d3.max(levelWidth)]);
         var focus = thisCommit, nodes = tree.nodes(root), links = tree.links(nodes);
         centerNode(focus);
+        updatePreview(focus);
         sortTree();
 
         var link = svgGroup.selectAll(".link")
@@ -230,8 +231,9 @@ function build_reingold() {
         circleEnter.append("circle")
             .attr("transform", function(d) { return "translate("+d.x+","+d.y+")"; })
             .attr("class",function(d){ return d.parent ? d.children ? "node" : "node" : "node node--root";})
-            .style("fill",function(d){ return d === thisCommit ?  "red" : d.children ? color(d.children.length) : "white";})
-            .style("stroke", function(d) { return d.children ? color(d.children.length) : "black";})
+            .style("fill",function(d){ return d === thisCommit ?  "#fd6500" : d.children ? color(d.children.length) : "white";})
+            .style("stroke", function(d) {
+                return d.children ? color(d.children.length) : d === thisCommit ? "#fc3e04" : "black" ;})
             .style("stroke-width", function(d) { return d === thisCommit ? 3 : 1; })
             .attr("r", radius);
 
