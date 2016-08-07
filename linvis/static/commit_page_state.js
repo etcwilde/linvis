@@ -235,6 +235,7 @@ function build_reingold() {
             .style("stroke", function(d) {
                 return d.children ? color(d.children.length) : d === thisCommit ? "#fc3e04" : "black" ;})
             .style("stroke-width", function(d) { return d === thisCommit ? 3 : 1; })
+            .style("cursor", "pointer")
             .attr("r", radius);
 
         node  = svgGroup.selectAll("g.node");
@@ -300,6 +301,7 @@ function build_bubble() {
         .append("circle")
         .attr("class", function(d) { return d.parent ? d.children ? "node" : "node" : "node node--root"; })
         .style("fill", function(d) { return d === thisCommit ? "red" : d.children ?  color(d.depth) : "white"; })
+        .style("cursor", "pointer")
         .on("click", function(d) { if (focus !== d) zoom(d), d3.event.stopPropagation(); })
         .on("mouseover", function(d) { updatePreview(d); })
         .on("mouseleave", function(d) { updatePreview(focus); });
