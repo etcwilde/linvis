@@ -4,8 +4,6 @@ var b_modules_loaded = false;
 var b_files_loaded = false;
 var b_tree_loaded = false;
 
-var b_listview = 0;
-
 var authors = [];
 var modules = [];
 var files = [];
@@ -85,23 +83,171 @@ function build_list_tree(base, root) {
 }
 
 function build_tree() {
-  $.get("/data/tree/JSON/" + cid, function(data) {
-    console.log("Getting: data/tree/JSON/" + cid);
-    tree  = jQuery.parseJSON(data);
-    var root = tree;
-    var remaining_path = crumbs;
-    remaining_path.shift();
-    while(remaining_path.length > 0)
-      root = root['children'][remaining_path.shift()];
-    tree_base = root;
-  }).success(function() {
-    $('#content').html("<ul></ul>", {"id": "list_tree"});
-    build_list_tree($('#content'), tree_base);
-  });
+    if (typeof tree_base === "undefined") {
+    $.get("/data/tree/JSON/" + cid, function(data) {
+        tree  = jQuery.parseJSON(data);
+        var root = tree;
+        var remaining_path = crumbs.slice();
+        remaining_path.shift();
+        while(remaining_path.length > 0)
+            root = root['children'][remaining_path.shift()];
+        tree_base = root;
+    }).success(function() {
+        $('#content').html("<ul></ul>", {"id": "list_tree"});
+        build_list_tree($('#content'), tree_base);
+    });
+    } else {
+        $('#content').html("<ul></ul>", {"id": "list_tree"});
+        build_list_tree($('#content'), tree_base);
+    }
+}
+
+function build_reingold() {
+    var tree_preview_node = $("<div></div>", {"id": "treePreview", "class": "container"});
+    var tree_view_node = $("<div></div>", {"id": "treeView", "class": "container"});
+    $('#content').html('');
+    $('#content')
+        .append(tree_preview_node)
+        .append(tree_view_node);
+
+    var duration = 750;
+    var root;
+    var levelWidth;
+    var radius = 15;
+
+    var viewerWidth = $('#treeView').width();
+    var viewerHeight = $(document).height();
+
+    var tree = d3.layout.tree();
+
+    var diagonal = d3.svg.diagonal()
+        .projection(function(d) { return [d.x, d.y]; });
+
+    function sortTree() {
+        tree.sort(function(a, b) {
+            return b.name.toLowerCase() < a.name.toLowerCase() ? 1 : -1;
+        });
+    }
+
+    function zoom() {
+        svgGroup.attr("transform",
+        "translate(" + d3.event.translate +
+        ")scale(" + d3.event.scale + ")");
+    }
+
+    function updatePreview(d) {
+        $("#treePreview").html("");
+        $("#treePreview")
+            .show()
+            .append($("<p></p>")
+                .html($("<a></a>", {"href": "/commits/" + d.cid}).html(d.name)))
+            .append($("<p></p>").html(d.author));
+    }
+
+
+    function click(d) {
+        if (d3.event.defaultPrevented) return; // Click suppressed
+        centerNode(d);
+        updatePreview(d);
+    }
+
+    var zoomListener = d3.behavior.zoom().scaleExtent([0.05, 5]).on("zoom", zoom);
+
+    var baseSVG = d3.select("#treeView").append("svg")
+        .attr("width", viewerWidth)
+        .attr("height", viewerHeight)
+        .attr("class", "overlay")
+        .call(zoomListener);
+
+    var svgGroup = baseSVG.append('g');
+
+    function centerNode(source) {
+        var scale = zoomListener.scale();
+        x = -source.x;
+        y = -source.y;
+        x = (viewerWidth / 2.) + x * scale ;
+        y = (viewerHeight / 2.) + y * scale;
+        svgGroup.transition()
+            .duration(duration)
+            .attr("transform", "translate("+x+","+y+")scale("+scale+")");
+        zoomListener.scale(scale);
+        zoomListener.translate([x,y]);
+    }
+
+
+    d3.json("/data/tree/JSON/" + cid, function(error, t) {
+        if (error) throw error;
+        // Extract this commit, convert children objects to arrays
+        var thisCommit;
+        function breakTree(inputTree) {
+            var retObject = {}
+            retObject.author = inputTree.author;
+            retObject.cid = inputTree.cid;
+            retObject.name = inputTree.name;
+            if (retObject.cid == cid) thisCommit = retObject;
+            if (inputTree.children != null) {
+                retObject.children = [];
+                $.each(inputTree.children, function(index, value) {
+                    retObject.children.push(breakTree(value));
+                });
+            }
+            return retObject;
+        }
+        var root = breakTree(t);
+        maxChildren = 0;
+        levelWidth = [1];
+        var childCount = function(level, n) {
+            if (n.children && n.children.length > 0) {
+                maxChildren = maxChildren < n.children.length ? n.children.length : maxChildren;
+                if (levelWidth.length <= level + 1) levelWidth.push(0);
+                levelWidth[level+1] += n.children.length;
+                n.children.forEach(function(d){childCount(level + 1, d);});
+            }
+        };
+        childCount(0, root);
+        var color = d3.scale.linear()
+            .domain([1, maxChildren])
+            .range(["hsl(212,100%,75%)", "hsl(212,100%,25%)"])
+            .interpolate(d3.interpolateHcl);
+        var maxWidthIndex = levelWidth.indexOf(d3.max(levelWidth));
+        tree = tree.size([d3.max(levelWidth) * radius * 4 + Math.pow((levelWidth.length - maxWidthIndex) * 2, 2),
+        levelWidth.length * radius * 5 + d3.max(levelWidth)]);
+        var focus = thisCommit, nodes = tree.nodes(root), links = tree.links(nodes);
+        centerNode(focus);
+        updatePreview(focus);
+        sortTree();
+
+        var link = svgGroup.selectAll(".link")
+            .data(links)
+            .enter().append("g")
+            .attr("fill", "none")
+            .append("path")
+            .attr("stroke-width", "1.2")
+            .attr("stroke", "#666")
+            .attr("class", "link")
+            .attr("d", diagonal);
+
+        var circle = svgGroup.selectAll("circle")
+            .data(nodes);
+
+        var circleEnter = circle.enter().append("g")
+            .on('click', click);
+
+        circleEnter.append("circle")
+            .attr("transform", function(d) { return "translate("+d.x+","+d.y+")"; })
+            .attr("class",function(d){ return d.parent ? d.children ? "node" : "node" : "node node--root";})
+            .style("fill",function(d){ return d === thisCommit ?  "#fd6500" : d.children ? color(d.children.length) : "white";})
+            .style("stroke", function(d) {
+                return d.children ? color(d.children.length) : d === thisCommit ? "#fc3e04" : "black" ;})
+            .style("stroke-width", function(d) { return d === thisCommit ? 3 : 1; })
+            .style("cursor", "pointer")
+            .attr("r", radius);
+
+        node  = svgGroup.selectAll("g.node");
+    });
 }
 
 function build_bubble() {
-
   var tree_preview_node = $("<div></div>", {"id": "treePreview", "class": "container"});
   var tree_view_node = $("<div></div>", {"id": "treeView", "class": "container"});
   $('#content').html('');
@@ -126,7 +272,7 @@ function build_bubble() {
       .attr("width", diameter)
       .attr("height", diameter)
       .append("g")
-      .attr("transform", "translate(" + diameter / 2 + "," + diameter / 2 + ")");
+      .attr("transform", "translate("+diameter/2+","+diameter/2+")");
     d3.json("/data/tree/JSON/" + cid, function(error, tree) {
       if (error) throw error;
       // unpack tree
@@ -159,7 +305,8 @@ function build_bubble() {
         .append("g")
         .append("circle")
         .attr("class", function(d) { return d.parent ? d.children ? "node" : "node" : "node node--root"; })
-        .style("fill", function(d) { return d === thisCommit ? "red" : d.children ?  color(d.depth) : "white"; })
+        .style("fill", function(d) { return d === thisCommit ? "#fd6500" : d.children ?  color(d.depth) : "white"; })
+        .style("cursor", "pointer")
         .on("click", function(d) { if (focus !== d) zoom(d), d3.event.stopPropagation(); })
         .on("mouseover", function(d) { updatePreview(d); })
         .on("mouseleave", function(d) { updatePreview(focus); });
@@ -199,7 +346,6 @@ function build_bubble() {
 function getModules() {
     $.get("/data/modules/JSON/" + cid, function(data) {
         modules = [];
-        console.log("data/modules/JSON/" + cid);
         var d = jQuery.parseJSON(data);
         var remaining_items = [jQuery.parseJSON(data)];
         var firewood = {};
@@ -242,6 +388,15 @@ function getModules() {
     });
 }
 
+function resetTabs() {
+    $("li[id=0]").removeClass("active");
+    $("li[id=1]").removeClass("active");
+    $("li[id=2]").removeClass("active");
+    $("li[id=3]").removeClass("active");
+    $("li[id=4]").removeClass("active");
+    $("li[id=5]").removeClass("active");
+}
+
 // Initialize
 $(document).ready( function() {
     // Found it!
@@ -260,16 +415,13 @@ $(document).ready( function() {
                 "<div class='spinner__item3'></div>"+
                 "<div class='spinner__item4'></div>");
         if(!b_message_loaded) {
-          console.log("Not loaded");
             $.get("/data/log/"+cid,function(data){message=data;});
             b_message_loaded = true;
         }
         $("#content").html("<pre id=\"log\">");
         $("pre[id='log']").html(message);
+        resetTabs();
         $("li[id=0]").addClass("active");
-        $("li[id=1]").removeClass("active");
-        $("li[id=2]").removeClass("active");
-        $("li[id=3]").removeClass("active");
     });
 
     $("li[id=1]").click(function() {
@@ -289,11 +441,8 @@ $(document).ready( function() {
                 {title: "Added"},
                 {title: "Removed"}]});
         }
-        $("li[id=0]").removeClass("active");
+        resetTabs();
         $("li[id=1]").addClass("active");
-        $("li[id=2]").removeClass("active");
-        $("li[id=3]").removeClass("active");
-        $("li[id=4]").removeClass("active");
     });
     $("li[id=2]").click(function() {
         $("#content").html("<div class='spinner'>"+
@@ -315,11 +464,8 @@ $(document).ready( function() {
                 {title: "Module"},
                 {title: "Count"}]});
         }
-        $("li[id=0]").removeClass("active");
-        $("li[id=1]").removeClass("active");
+        resetTabs();
         $("li[id=2]").addClass("active");
-        $("li[id=3]").removeClass("active");
-        $("li[id=4]").removeClass("active");
     });
     $("li[id=3]").click(function() {
         $("#content").html("<div class='spinner'>" +
@@ -328,13 +474,8 @@ $(document).ready( function() {
                 "<div class='spinner__item3'></div>"+
                 "<div class='spinner__item4'></div>");
         build_tree($('#list_tree'), tree_base);
-
-        //buildTree($('#content'));
-        $("li[id=0]").removeClass("active");
-        $("li[id=1]").removeClass("active");
-        $("li[id=2]").removeClass("active");
+        resetTabs();
         $("li[id=3]").addClass("active");
-        $("li[id=4]").removeClass("active");
     });
     $("li[id=4]").click(function() {
         $("#content").html("<div class='spinner'>" +
@@ -343,10 +484,17 @@ $(document).ready( function() {
                 "<div class='spinner__item3'></div>"+
                 "<div class='spinner__item4'></div>");
         build_bubble();
-        $("li[id=0]").removeClass("active");
-        $("li[id=1]").removeClass("active");
-        $("li[id=2]").removeClass("active");
-        $("li[id=3]").removeClass("active");
+        resetTabs();
         $("li[id=4]").addClass("active");
+    });
+    $("li[id=5]").click(function() {
+        $("#content").html("<div class='spinner'>" +
+                           "<div class='spinner__item1'></div>"+
+                           "<div class='spinner__item2'></div>"+
+                           "<div class='spinner__item3'></div>"+
+                           "<div class='spinner__item4'></div>");
+        build_reingold();
+        resetTabs();
+        $("li[id=5]").addClass("active");
     });
 });
