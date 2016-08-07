@@ -152,7 +152,7 @@ function build_reingold() {
         x = -source.x;
         y = -source.y;
         x = (viewerWidth / 2.) + x * scale ;
-        y = (viewerHeight/2.) + y * scale;
+        y = (viewerHeight / 2.) + y * scale;
         svgGroup.transition()
             .duration(750)
             .attr("transform", "translate("+x+","+y+")scale("+scale+")");
@@ -163,7 +163,6 @@ function build_reingold() {
 
     d3.json("/data/tree/JSON/" + cid, function(error, t) {
         if (error) throw error;
-
         // Extract this commit, convert children objects to arrays
         var thisCommit;
         function breakTree(inputTree) {
@@ -195,14 +194,12 @@ function build_reingold() {
         childCount(0, root);
         var color = d3.scale.linear()
             .domain([1, maxChildren])
-            .range(["hsl(212, 100%, 75%)", "hsl(212, 100%, 25%)"])
+            .range(["hsl(212,100%,75%)", "hsl(212,100%,25%)"])
             .interpolate(d3.interpolateHcl);
         var maxWidthIndex = levelWidth.indexOf(d3.max(levelWidth));
         tree = tree.size([d3.max(levelWidth) * radius * 4 + Math.pow((levelWidth.length - maxWidthIndex) * 2, 2),
         levelWidth.length * radius * 5 + d3.max(levelWidth)]);
-        var focus = thisCommit,
-            nodes = tree.nodes(root),
-            links = tree.links(nodes);
+        var focus = thisCommit, nodes = tree.nodes(root), links = tree.links(nodes);
         centerNode(focus);
         sortTree();
 
@@ -223,24 +220,15 @@ function build_reingold() {
             .on('click', click);
 
         circleEnter.append("circle")
-            .attr("transform", function(d) {
-                return "translate(" + d.x + "," + d.y + ")"; })
-            .attr("class", function(d) { return d.parent ? d.children ? "node" : "node" : "node node--root"; })
-            .style("fill", function(d) {
-                d.color = d === thisCommit ?
-                    "red" :
-                    d.children ?
-                        color(d.children.length) :
-                        "white";
-                return d.color;})
+            .attr("transform", function(d) { return "translate("+d.x+","+d.y+")"; })
+            .attr("class",function(d){ return d.parent ? d.children ? "node" : "node" : "node node--root";})
+            .style("fill",function(d){ return d === thisCommit ?  "red" : d.children ? color(d.children.length) : "white";})
             .style("stroke", function(d) { return d.children ? color(d.children.length) : "black";})
             .style("stroke-width", function(d) { return d === thisCommit ? 3 : 1; })
             .attr("r", radius);
 
         node  = svgGroup.selectAll("g.node");
     });
-
-
 }
 
 function build_bubble() {
