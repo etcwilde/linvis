@@ -110,7 +110,8 @@ function build_reingold() {
     // var panBoundary = 20;
     var duration = 750;
     var root;
-    var levelWidth ;
+    var levelWidth;
+    var radius = 15;
 
     var viewerWidth = $('#treeView').width();
     var viewerHeight = $(document).height();
@@ -125,9 +126,6 @@ function build_reingold() {
             return b.name.toLowerCase() < a.name.toLowerCase() ? 1 : -1;
         });
     }
-    // TODO: Visit tree data to get max label length
-    // TODO: visit tree data to get number of nodes
-    // TODO: sort tree
 
     function zoom() {
         svgGroup.attr("transform",
@@ -139,7 +137,7 @@ function build_reingold() {
         if (d3.event.defaultPrevented) return; // Click suppressed
     }
 
-    var zoomListener = d3.behavior.zoom().scaleExtent([0.1, 3]).on("zoom", zoom);
+    var zoomListener = d3.behavior.zoom().scaleExtent([0.05, 5]).on("zoom", zoom);
 
     var baseSVG = d3.select("#treeView").append("svg")
         .attr("width", viewerWidth)
@@ -149,20 +147,15 @@ function build_reingold() {
 
     var svgGroup = baseSVG.append('g');
 
-    var color = d3.scale.linear()
-        .domain([-1, 10])
-        .range(["hsl(200, 80%, 80%)", "hsl(260,30%,40%)"])
-        .interpolate(d3.interpolateHcl);
-
     function centerNode(source) {
         var scale = zoomListener.scale();
         x = -source.x;
         y = -source.y;
         x = (viewerWidth / 2.) + x * scale ;
-        y = (viewerHeight/2.)  + y * scale;
+        y = (viewerHeight/2.) + y * scale;
         svgGroup.transition()
             .duration(750)
-            .attr("transform", "translate(" +  x + "," +  y  + ")scale("+scale+")");
+            .attr("transform", "translate("+x+","+y+")scale("+scale+")");
         zoomListener.scale(scale);
         zoomListener.translate([x,y]);
     }
@@ -179,8 +172,7 @@ function build_reingold() {
             retObject.cid = inputTree.cid;
             retObject.name = inputTree.name;
             if (retObject.cid == cid) thisCommit = retObject;
-            if (inputTree.children != null)
-            {
+            if (inputTree.children != null) {
                 retObject.children = [];
                 $.each(inputTree.children, function(index, value) {
                     retObject.children.push(breakTree(value));
@@ -188,31 +180,31 @@ function build_reingold() {
             }
             return retObject;
         }
-
         var root = breakTree(t);
-
+        maxChildren = 0;
         levelWidth = [1];
         var childCount = function(level, n) {
             if (n.children && n.children.length > 0) {
+                maxChildren = maxChildren < n.children.length ? n.children.length : maxChildren;
                 if (levelWidth.length <= level + 1) levelWidth.push(0);
                 levelWidth[level+1] += n.children.length;
-                n.children.forEach(function(d){childCount(levelWidth + 1,d);});
+                n.children.forEach(function(d){childCount(level + 1, d);});
             }
         };
+
         childCount(0, root);
-        // console.log("Maximum Width: " + d3.max(levelWidth) + " Depth: " +  levelWidth.length);
-
-        tree = tree.size([d3.max(levelWidth) * 90, levelWidth.length * 150 + d3.max(levelWidth) * 10]);
-
-
+        var color = d3.scale.linear()
+            .domain([1, maxChildren])
+            .range(["hsl(212, 100%, 75%)", "hsl(212, 100%, 25%)"])
+            .interpolate(d3.interpolateHcl);
+        var maxWidthIndex = levelWidth.indexOf(d3.max(levelWidth));
+        tree = tree.size([d3.max(levelWidth) * radius * 4 + Math.pow((levelWidth.length - maxWidthIndex) * 2, 2),
+        levelWidth.length * radius * 5 + d3.max(levelWidth)]);
         var focus = thisCommit,
             nodes = tree.nodes(root),
             links = tree.links(nodes);
-
         centerNode(focus);
         sortTree();
-        // Now, figure out how dang big to make the tree
-        // Need maximum depth and maximum level width
 
         var link = svgGroup.selectAll(".link")
             .data(links)
@@ -230,19 +222,20 @@ function build_reingold() {
         var circleEnter = circle.enter().append("g")
             .on('click', click);
 
-
         circleEnter.append("circle")
             .attr("transform", function(d) {
                 return "translate(" + d.x + "," + d.y + ")"; })
             .attr("class", function(d) { return d.parent ? d.children ? "node" : "node" : "node node--root"; })
-            .style("fill", function(d) { 
-                d.color = d === thisCommit ? "red" : color(d.depth);
+            .style("fill", function(d) {
+                d.color = d === thisCommit ?
+                    "red" :
+                    d.children ?
+                        color(d.children.length) :
+                        "white";
                 return d.color;})
-            .attr("r", 10);
-        // circleEnter.append("text")
-        //     .attr("x", function(d) { return d.x - (d.name.length / 2.) * 8;})
-        //     .attr("y", function(d) { return d.y + 14; })
-        //     .text(function(d) { return d.name; });
+            .style("stroke", function(d) { return d.children ? color(d.children.length) : "black";})
+            .style("stroke-width", function(d) { return d === thisCommit ? 3 : 1; })
+            .attr("r", radius);
 
         node  = svgGroup.selectAll("g.node");
     });
