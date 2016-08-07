@@ -83,18 +83,23 @@ function build_list_tree(base, root) {
 }
 
 function build_tree() {
-  $.get("/data/tree/JSON/" + cid, function(data) {
-    tree  = jQuery.parseJSON(data);
-    var root = tree;
-    var remaining_path = crumbs;
-    remaining_path.shift();
-    while(remaining_path.length > 0)
-      root = root['children'][remaining_path.shift()];
-    tree_base = root;
-  }).success(function() {
-    $('#content').html("<ul></ul>", {"id": "list_tree"});
-    build_list_tree($('#content'), tree_base);
-  });
+    if (typeof tree_base === "undefined") {
+    $.get("/data/tree/JSON/" + cid, function(data) {
+        tree  = jQuery.parseJSON(data);
+        var root = tree;
+        var remaining_path = crumbs.slice();
+        remaining_path.shift();
+        while(remaining_path.length > 0)
+            root = root['children'][remaining_path.shift()];
+        tree_base = root;
+    }).success(function() {
+        $('#content').html("<ul></ul>", {"id": "list_tree"});
+        build_list_tree($('#content'), tree_base);
+    });
+    } else {
+        $('#content').html("<ul></ul>", {"id": "list_tree"});
+        build_list_tree($('#content'), tree_base);
+    }
 }
 
 function build_reingold() {
@@ -469,8 +474,6 @@ $(document).ready( function() {
                 "<div class='spinner__item3'></div>"+
                 "<div class='spinner__item4'></div>");
         build_tree($('#list_tree'), tree_base);
-
-        //buildTree($('#content'));
         resetTabs();
         $("li[id=3]").addClass("active");
     });
