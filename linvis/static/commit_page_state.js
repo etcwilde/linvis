@@ -305,7 +305,7 @@ function build_bubble() {
         .append("g")
         .append("circle")
         .attr("class", function(d) { return d.parent ? d.children ? "node" : "node" : "node node--root"; })
-        .style("fill", function(d) { return d === thisCommit ? "red" : d.children ?  color(d.depth) : "white"; })
+        .style("fill", function(d) { return d === thisCommit ? "#fd6500" : d.children ?  color(d.depth) : "white"; })
         .style("cursor", "pointer")
         .on("click", function(d) { if (focus !== d) zoom(d), d3.event.stopPropagation(); })
         .on("mouseover", function(d) { updatePreview(d); })
