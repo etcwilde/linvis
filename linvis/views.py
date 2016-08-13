@@ -10,6 +10,11 @@ import linvis.searches
 import linvis.commit_page
 
 
+@app.route('/artifact')
+def artifact():
+    return render_template('artifact.html')
+
+
 @app.route('/commits/<cid>/<view_type>', methods=['GET', 'POST'])
 @app.route('/commits/<cid>', methods=['GET', 'POST'])
 @app.route('/commits/', methods=['GET', 'POST'])
