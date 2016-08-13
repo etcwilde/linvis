@@ -1,0 +1,173 @@
+<html>
+<head>
+	<title>Linvis Artifact</title>
+</head>
+<body>
+
+<h1>Merge-tree: Visualizing the integration of commits into Linux</h1>
+<h2>Abstract</h2>
+
+<p>
+With an average of more than 900 top-level merges
+into the Linux kernel per release, many containing hundreds
+of commits and some containing thousands, maintenance of
+older versions of the kernel becomes nearly impossible. Various
+commercial products, such as the Android platform, run older
+versions of the kernel. Due to security, performance, and changing
+hardware needs, maintainers must understand what changes
+(commits) are added to the current version of the kernel since
+the last time they inspected it in order to make the necessary
+patches.
+Current tools provide information about repositories through
+the directed acyclic graph (DAG) of the repository, which is
+helpful for smaller projects. However, with the scale and number
+of branches in the kernel the DAG becomes overwhelming very
+quickly. Furthermore, the DAG contains every ancestor of every
+commit, while maintainers are more interested in how and when
+a commit arrives to the official Linux repository.
+In this paper, we propose the merge-tree view, a simplified
+transformation of the DAG of the Linux git repository that shows
+the way in which commits are merged into the master branch of
+Linux. Using the merge-tree view we build Linvis, a tool that is
+designed to allow users to explore how commits are merged into
+the Linux kernel
+</p>
+
+<a href="http://li.turingmachine.org/">Linvis Page (li.turingmachine.org)</a>
+<a href="static/linvis.zip">Database (Gitlinux)</a>
+
+<h2>Usage</h2>
+<h3>Linvis</h3>
+
+<h4>Search</h4>
+<p>
+The landing page allows a user to perform searches. The information is broken down
+by release. The user can further refine the date range by commit date, which is the
+date that the commit was added to the kernel, not when it was authored. The user can
+further refine the search by author name, commit ID, or a keyword from the preview
+of the log message. Clicking "Merges by Linus", will select all the root-level
+merges performed by Linus that contain a merge or commit that satisfies the search
+filters.</p>
+
+<p>The user will be presented with a table of all the commits and merges that
+satisfy their query.</p>
+
+<h4>Commit Page</h4>
+<p>The commit page has five tabs presenting information about the commit.</p>
+<p>The first and default tab shows the full log message of the commit.</p>
+<p>The second tab shows the information about the files edited in the commit or 
+merge. This includes the filename, the number of lines added, and the number of 
+lines removed. If the item being viewed is a merge, then the file information is
+aggregated over all commits being merged. The lines added and lines removed are
+simply summed. I.e, if one commit adds a line and the next commit removes that line, 
+it will increment both the lines added and lines removed.</p>
+<p>The third tab shows what modules were changed in a merge. This provides
+information about what areas of the kernel are being changed in a merge.</p>
+<p>The fourth tab shows a textual list tree of the commits and merges. This is
+useful for searching for a specific piece of text within a preview. It is also
+useful for getting an overview of the types of commits within a merge.</p>
+<p>The fifth tab is the bubble tree. The bubble tree is designed to show the
+topological structure of the repository and where a commit or merge is situated in
+relation to the root and the number of commits and merges within a merge.</p>
+
+<h3>Database</h3>
+<h4>Installation Instructions</h4>
+The database is known to work with the postgresql dbms, but the sql file is provided
+and so it may work with another dbms.
+
+<h5>Postgresql Database Installation Instructions</h5>
+<ol>
+	<li>Install Postgresql</li>
+	<li>Unzip database <pre>$ unzip linvis.zip</pre></li>
+	<li>Create gitlinux database <pre>$ createdb gitlinux</pre></li>
+	<li>Load data <pre>$ psql gitlinux &lt linvis.sql</pre></li>
+	<li>Play! <pre>$ psql gitlinux</pre></li>
+</ol>
+<h4>Tables</h4>
+<table>
+	<tr><th>Name</th><th>Description</th> </tr>
+	<tr><td>baseline</td><td>List of all merges into the main branch</td></tr>
+	<tr><td>commits</td><td>All metadata for each commit</td></tr>
+	<tr><td>filesmod</td><td>File metadata</td></tr>
+	<tr><td>logs</td><td>Log information for each commit</td></tr>
+	<tr><td>pathtomerge</td><td>The tree structure of the repository</td></tr>
+	<tr><td>releases</td><td>Information about releases</td></tr>
+</table>
+
+<h5>Baseline</h5>
+
+Only contains merge id's performed by Linus into the kernel master branch.
+
+<table>
+	<tr><th>Column</th><th>Description</th></tr>
+	<tr><td>cid</td><td>Commit ID<td></tr>	
+</table>
+
+<h5>Commits</h5>
+
+Contains the metadata for each commit.
+
+<table>
+	<tr><th>Column</th><th>Description</th></tr>
+	<tr><td>cid</td><td>Commit ID<td></tr>
+	<tr><td>author</td><td>Name and email of author of the commit</td></tr>
+	<tr><td>autdate</td><td>Date that the commit was authored</td></tr>
+	<tr><td>committer</td><td>Name and email of the person who added the commit
+			to the path to Linux</td></tr>
+	<tr><td>comdate</td><td>Date the commit was merged into the path to
+			Linux</td></tr>
+	<tr><td>ismerge</td><td>Is the commit a merge commit?</td></tr>
+	<tr><td>diff</td><td>Changes to the files made in the commit</td></tr>
+</table>
+
+<h5>Filesmod</h5>
+
+Contains information about changes to files.
+
+<table>
+	<tr><th>Column</th><th>Description</th></tr>
+	<tr><td>cid</td><td>Commit ID</td></tr>
+	<tr><td>file</td><td>Name of the file being changed</td></tr>
+	<tr><td>added</td><td>Number of lines added to the file in this commit</td></tr>
+	<tr><td>removed</td><td>Number of lines removed from the file in this commit</td></tr>
+</table>
+
+<h5>Logs</h5>
+
+Contains the log data
+
+<table>
+	<tr><th>Column</th><th>Description</th></tr>
+	<tr><td>cid</td><td>Commit ID</td></tr>
+	<tr><td>preview</td><td>First-line of the log message</td></tr>
+	<tr><td>full</td><td>Full text of the log message</td></tr>
+</table>
+
+<h5>Releases</h5>
+
+Contains the information necessary for determining which commit ID's are releases
+and which are not. It also contains information about which are candidate releases,
+which are real releases, and what the previous release was.
+
+<table>
+	<tr><th>Column</th><th>Description</th></tr>
+	<tr><td>ver</td><td>Name of the version</td></tr>
+	<tr><td>candidate</td><td>True if the release is a candidate
+			release</td></tr>
+	<tr><td>prevver</td><td>Name of previous version</td></tr>
+	<tr><td>prevrealver</td><td>Name of the previous non-candidate
+			release</td></tr>
+	<tr><td>vercid</td><td>Commit id of the version</td></tr>
+	<tr><td>prevvercid</td><td>Commit id of the previous version</td></tr>
+	<tr><td>prevrealvercid</td><td>Commit id of the previous non-candidate
+			release</td></tr>
+</table>
+
+<h2>Authors</h2>
+<ul>
+	<li>Evan Wilde</li>
+	<li>Daniel German</li>
+</ul>
+
+</body>
+</html>
