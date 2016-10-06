@@ -10,5 +10,9 @@ __pycache__/
 # Pip
 pip-selfcheck.json
 
+# Server files
+app.conf
+secret_key
+
 # Vim Generated Files
 *.sw*
