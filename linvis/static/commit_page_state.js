@@ -7,9 +7,12 @@ var b_tree_loaded = false;
 var authors = [];
 var modules = [];
 var files = [];
-var tree = {};
+var tree = null;
 var tree_base;
-var crumbs=[];
+
+var commit_list = [];
+var crumbTree = null;
+var bread_crumb_list = []
 
 var b_message_loaded = false;
 
@@ -101,6 +104,7 @@ function build_tree() {
         build_list_tree($('#content'), tree_base);
     }
 }
+
 
 function build_reingold() {
     var tree_preview_node = $("<div></div>", {"id": "treePreview", "class": "container"});
@@ -397,8 +401,35 @@ function resetTabs() {
     $("li[id=5]").removeClass("active");
 }
 
+// Builds crumb tree
+function processCommits(success_func) {
+    console.log("Process Commits called");
+    if (!crumbTree) {
+        console.log("No CrumbTree")
+        crumbTree = new RadixTree()
+    }
+
+    $.get("/data/tree/JSON/" + cid, function(data) {
+        var remaining_items = [jQuery.parseJSON(data)];
+        while (remaining_items.length > 0) {
+            var item = remaining_items.shift();
+            commit_list.push(item.cid);
+            for (var c in item.children) { remaining_items.push(item.children[c]) }
+        }
+        crumbTree = new RadixTree()
+        commit_list.forEach(function(cv) { crumbTree.add(cv) })
+        crumbs.forEach(function(cv) {
+            console.log(cv)
+            bread_crumb_list.push([cv, crumbTree.find(cv).prefix]) })
+    })
+    .success(
+    function() {
+    if (success_func) success_func() });
+}
+
 // Initialize
 $(document).ready( function() {
+
     // Found it!
     if(cid) $.get("/data/log/"+cid,function(data){message=data;})
       .success(function() {
@@ -406,6 +437,7 @@ $(document).ready( function() {
         $("li[id=0]").addClass("active");
         $("#content").html("<pre id=\"log\">");
         $("pre[id='log']").html(message);
+        processCommits();
       });
 
     $("li[id=0]").click(function() {
