@@ -84,38 +84,57 @@ def get_tree_data(cid):
     return json.dumps(root)
 
 
-q_filedata = """
-SELECT pathtomerge.cid, mnextmerge, mcidlinus, file, added, removed FROM
-    pathtomerge FULL JOIN
-    filesmod ON pathtomerge.cid = filesmod.cid
-    WHERE mcidlinus =
-        (SELECT CASE WHEN EXISTS
-            (SELECT mcidlinus FROM pathtomerge
-                WHERE cid = %(cid)s
-            )
-        THEN
-            (SELECT mcidlinus FROM pathtomerge
-                WHERE cid = %(cid)s
-            )
-        ELSE %(cid)s END
-        )
-    UNION
-        (SELECT cid, NULL, NULL, NULL, NULL, NULL FROM commits
-            WHERE cid = (
-                SELECT CASE WHEN EXISTS
-                    (SELECT mcidlinus FROM pathtomerge WHERE
-                        cid = %(cid)s
-                    )
-                    THEN
-                    (SELECT mcidlinus AS cid FROM pathtomerge
-                    WHERE cid = %(cid)s
-                    )
-                    ELSE %(cid)s
-                    END
-                )
-        );
-"""
 
+q_filedata = """
+SELECT    pathtomerge.cid,
+          mnextmerge,
+          mcidlinus,
+          FILE,
+          added,
+          removed
+FROM      pathtomerge
+FULL JOIN filesmod
+ON        pathtomerge.cid = filesmod.cid
+WHERE     mcidlinus =
+          (
+                 SELECT
+                        CASE
+                               WHEN EXISTS
+                                      (
+                                             SELECT mcidlinus
+                                             FROM   pathtomerge
+                                             WHERE  cid = %(cid)s ) THEN
+                                      (
+                                             SELECT mcidlinus
+                                             FROM   pathtomerge
+                                             WHERE  cid = %(cid)s )
+                               ELSE %(cid)s
+                        END )
+   UNION
+         (
+                SELECT cid,
+                       NULL,
+                       NULL,
+                       NULL,
+                       NULL,
+                       NULL
+                FROM   commits
+                WHERE  cid =
+                       (
+                              SELECT
+                                     CASE
+                                            WHEN EXISTS
+                                                   (
+                                                          SELECT mcidlinus
+                                                          FROM   pathtomerge
+                                                          WHERE  cid = %(cid)s ) THEN
+                                                   (
+                                                          SELECT mcidlinus AS cid
+                                                          FROM   pathtomerge
+                                                          WHERE  cid = %(cid)s )
+                                            ELSE %(cid)s
+                                     END ) );
+              """
 
 @app.route('/data/files/JSON/<cid>')
 def get_files(cid):
