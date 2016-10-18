@@ -58,8 +58,10 @@ function getFiles() {
       files.push([key, tmp_files[key].added, tmp_files[key].removed]);
   }).success(function() {
     b_files_loaded = true;
-    $('#content').html("<table id=\"file-table\" class=\"display table table-striped table-bordered\" width=100%></table>");
-    $('table[id=file-table]').DataTable( {
+    $('#content').html($("<table></table>", { "id": "file-table",
+                                              "class": "display table table-striped table-bordered",
+                                              "width": "100%"}));
+    $('table[id=file-table]').DataTable({
       data: files,
       columns: [
         {title: "Filename" },
@@ -82,8 +84,7 @@ function build_list_tree(base, root) {
   }
 }
 
-function build_tree() {
-    if (typeof tree_base === "undefined") {
+function get_treeBase(continuation) {
     $.get("/data/tree/JSON/" + cid, function(data) {
         tree  = jQuery.parseJSON(data);
         var root = tree;
@@ -92,13 +93,58 @@ function build_tree() {
         while(remaining_path.length > 0)
             root = root['children'][remaining_path.shift()];
         tree_base = root;
-    }).success(function() {
+    }).success(continuation);
+}
+
+function build_tree() {
+    var bt = function() {
         $('#content').html("<ul></ul>", {"id": "list_tree"});
         build_list_tree($('#content'), tree_base);
-    });
+    }
+    if (typeof tree_base === "undefined") { get_treeBase(bt); } else { bt(); }
+}
+
+function getAuthors() {
+    var build_authors = function() {
+        $.get("/data/authors/JSON/" + cid, function(data) {
+            data = jQuery.parseJSON(data);
+            var authKeys = {};
+            var remaining_items = [tree_base];
+            var firewood = {};
+            var cids = [];
+            while(remaining_items.length > 0) {
+                var item = remaining_items.shift();
+                var children = [];
+                for (var key in item.children) {
+                    if (key in data && data[key].author in authKeys) {
+                        authKeys[data[key].author].added += data[key].added;
+                        authKeys[data[key].author].removed +=  data[key].removed;
+                    } else if (key in data) {
+                        authKeys[data[key].author] = data[key];
+                    }
+                    remaining_items.push(item.children[key]);
+                }
+            }
+            var authors = [];
+            for (var a in authKeys) {
+                authors.push([a, authKeys[a].added, authKeys[a].removed, authKeys[a].added - authKeys[a].removed, authKeys[a].added + authKeys[a].removed]);
+            }
+            $('#content').html($("<table></table>", { "id": "author-table",
+                "class": "display table table-striped table-bordered",
+                "width": "100%"}));
+            $('table[id=author-table]').DataTable({
+                data: authors,
+                columns: [  {title: "Author"},
+                {title: "Added"},
+                {title: "Removed"},
+                {title: "Delta"},
+                {title: "Total"}]});
+        });
+    }
+    if (typeof tree_base === "undefined") {
+        get_treeBase(build_authors);
     } else {
-        $('#content').html("<ul></ul>", {"id": "list_tree"});
-        build_list_tree($('#content'), tree_base);
+        build_authors();
     }
 }
 
@@ -395,6 +441,7 @@ function resetTabs() {
     $("li[id=3]").removeClass("active");
     $("li[id=4]").removeClass("active");
     $("li[id=5]").removeClass("active");
+    $("li[id=6]").removeClass("active");
 }
 
 // Initialize
@@ -496,5 +543,15 @@ $(document).ready( function() {
         build_reingold();
         resetTabs();
         $("li[id=5]").addClass("active");
+    });
+    $("li[id=6]").click(function() {
+        $("#content").html("<div class='spinner'>" +
+                           "<div class='spinner__item1'></div>"+
+                           "<div class='spinner__item2'></div>"+
+                           "<div class='spinner__item3'></div>"+
+                           "<div class='spinner__item4'></div>");
+        getAuthors();
+        resetTabs();
+        $("li[id=6]").addClass("active");
     });
 });
