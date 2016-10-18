@@ -23,6 +23,7 @@ function getFiles() {
     var cids = [];
     while(remaining_items.length > 0) {
       var item = remaining_items.shift();
+      console.log(item);
       cids.push(item.cid);
       var children = [];
       for (var i = 0; i < item.children.length; i++) {
@@ -100,6 +101,60 @@ function build_tree() {
         $('#content').html("<ul></ul>", {"id": "list_tree"});
         build_list_tree($('#content'), tree_base);
     }
+}
+
+function get_authors() {
+
+    var handler = function() {
+        console.log(tree_base);
+        merge_authors = {}      // Number of merges
+        commit_authors = {}     // Number of merges, number of files, number of lines
+        remaining_items = tree_base.children;
+        if (remaining_items == null) {
+            $('#content').html($("<table></table>",
+                                        {"id": "author-table",
+                                         "class": "display table table-striped table-bordered",
+                                         "width": "100%"}));
+            $('table[id=author-table]').DataTable({
+                                            data: [[tree_base.author]],
+                                            columns: [ {title: "Author"} ]});
+            return;
+        } // There are remaining items
+
+        console.log("Remaining Item");
+        console.log(remaining_items);
+
+        var cids = [];
+        var firewood = {};
+        while (remaining_items.length > 0) {
+            var item = remaining_items.shift();
+
+            console.log(item);
+        }
+
+
+        $('#content').html($("<div></div>", {"class": "row"})
+                           .append($("<div></div>", { "class": "col-sm-4"}).html("Hello"))
+                           .append($("<div></div>", { "class": "col-sm-4"}).html("Bill")));
+    }
+
+    if (typeof tree_base === "undefined") {
+        console.log("No tree base");
+        $.get("/data/tree/JSON/" + cid, function(data) {
+            console.log("Getting tree data");
+            tree = jQuery.parseJSON(data);
+            var root = tree;
+            var remaining_path = crumbs.slice();
+            remaining_path.shift();
+            while (remaining_path.length > 0)
+                root = root['children'][remaining_path.shift()];
+           tree_base = root;
+        }).success(handler);
+    } else {
+        handler();
+    }
+
+    // At this point, the tree-base is set
 }
 
 function build_reingold() {
@@ -395,6 +450,7 @@ function resetTabs() {
     $("li[id=3]").removeClass("active");
     $("li[id=4]").removeClass("active");
     $("li[id=5]").removeClass("active");
+    $("li[id=6]").removeClass("active");
 }
 
 // Initialize
@@ -496,5 +552,15 @@ $(document).ready( function() {
         build_reingold();
         resetTabs();
         $("li[id=5]").addClass("active");
+    });
+    $("li[id=6]").click(function() {
+        $("#content").html("<div class='spinner'>" +
+                           "<div class='spinner__item1'></div>"+
+                           "<div class='spinner__item2'></div>"+
+                           "<div class='spinner__item3'></div>"+
+                           "<div class='spinner__item4'></div>");
+        get_authors();
+        resetTabs();
+        $("li[id=6]").addClass("active");
     });
 });
