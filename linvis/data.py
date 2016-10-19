@@ -89,12 +89,15 @@ q_filedata = """
 SELECT    pathtomerge.cid,
           mnextmerge,
           mcidlinus,
+          author,
           FILE,
           added,
           removed
 FROM      pathtomerge
 FULL JOIN filesmod
 ON        pathtomerge.cid = filesmod.cid
+LEFT JOIN commits
+ON commits.cid = filesmod.cid
 WHERE     mcidlinus =
           (
                  SELECT
@@ -113,6 +116,7 @@ WHERE     mcidlinus =
    UNION
          (
                 SELECT cid,
+                       NULL,
                        NULL,
                        NULL,
                        NULL,
@@ -147,7 +151,7 @@ def get_files(cid):
                   "cid": mcid,
                   "mnext": mnext,
                   "mlinus": mlinus}
-                 for mcid, mnext, mlinus, fname, added, removed in cur]
+                 for mcid, mnext, mlinus, _, fname, added, removed in cur]
 
     # Initialize Tree structure
     tree_data = {}
@@ -173,6 +177,20 @@ def get_files(cid):
                 tree_data[tree_data[item]['mnext']]['children']\
                     .append(tree_data[item])
     return json.dumps(tree_data[cid])
+
+
+@app.route('/data/authors/JSON/<cid>')
+def get_authors(cid):
+    items = []
+    with get_cursor() as cur:
+        cur.execute(q_filedata, {'cid': cid})
+        items = [{"fname": fname,
+                  "author": author,
+                  "added": added,
+                  "removed": removed,
+                  "cid": mcid}
+                 for mcid, mnext, mlinus, author, fname, added, removed in cur]
+    return json.dumps([item for item in items if item['fname'] is not None])
 
 
 q_moddata = """

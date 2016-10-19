@@ -103,56 +103,32 @@ function build_tree() {
     }
 }
 
-function get_authors() {
-
-    var handler = function() {
-        console.log(tree_base);
-        merge_authors = {}      // Number of merges
-        commit_authors = {}     // Number of merges, number of files, number of lines
-        remaining_items = tree_base.children;
-        if (remaining_items == null) {
-            $('#content').html($("<table></table>",
-                                        {"id": "author-table",
-                                         "class": "display table table-striped table-bordered",
-                                         "width": "100%"}));
-            $('table[id=author-table]').DataTable({
-                                            data: [[tree_base.author]],
-                                            columns: [ {title: "Author"} ]});
-            return;
-        } // There are remaining items
-
-        console.log("Remaining Item");
-        console.log(remaining_items);
-
-        var cids = [];
-        var firewood = {};
-        while (remaining_items.length > 0) {
-            var item = remaining_items.shift();
-
-            console.log(item);
+function getAuthors() {
+    $.get("/data/authors/JSON/" + cid, function(data) {
+        data = jQuery.parseJSON(data);
+        var authors_keys = {};
+        for (var i in data) {
+            if (data[i].author in authors_keys) {
+                authors_keys[data[i].author].added += data[i].added;
+                authors_keys[data[i].author].removed += data[i].removed;
+            } else {
+                authors_keys[data[i].author] = { 'added': data[i].added,
+                                            'removed': data[i].removed }
+            }
         }
-
-
-        $('#content').html($("<div></div>", {"class": "row"})
-                           .append($("<div></div>", { "class": "col-sm-4"}).html("Hello"))
-                           .append($("<div></div>", { "class": "col-sm-4"}).html("Bill")));
-    }
-
-    if (typeof tree_base === "undefined") {
-        console.log("No tree base");
-        $.get("/data/tree/JSON/" + cid, function(data) {
-            console.log("Getting tree data");
-            tree = jQuery.parseJSON(data);
-            var root = tree;
-            var remaining_path = crumbs.slice();
-            remaining_path.shift();
-            while (remaining_path.length > 0)
-                root = root['children'][remaining_path.shift()];
-           tree_base = root;
-        }).success(handler);
-    } else {
-        handler();
-    }
+        var authors = [];
+        for (var a in authors_keys) {
+            authors.push([a, authors_keys[a].added, authors_keys[a].removed]);
+        }
+        $('#content').html($("<table></table>", { "id": "author-table",
+                                                  "class": "display table table-striped table-bordered",
+                                                  "width": "100%"}));
+        $('table[id=author-table]').DataTable({
+            data: authors,
+            columns: [  {title: "Author"},
+                        {title: "Added"},
+                        {title: "Removed"}]});
+    });
 
     // At this point, the tree-base is set
 }
@@ -559,7 +535,7 @@ $(document).ready( function() {
                            "<div class='spinner__item2'></div>"+
                            "<div class='spinner__item3'></div>"+
                            "<div class='spinner__item4'></div>");
-        get_authors();
+        getAuthors();
         resetTabs();
         $("li[id=6]").addClass("active");
     });
