@@ -31,23 +31,24 @@ def init():
         with open(key_file, 'wb+') as f:
             f.write(key)
         app.secret_key = key
-    db_login = ""
+    db_login = "linux_app"
     db_name = "gitlinux"
     password = pad_pass("", app.secret_key)
-    with open(config_file, 'r') as config:
-        for line in config:
-            if line[0] == '#':  # Ignore rid of commends immediately
-                continue
-            db_login_matches = re.match(db_login_pattern, line)
-            if db_login_matches:
-                db_login = db_login_matches.group(1)
-                print("Set Username:", db_login)
-                continue
-            db_name_matches = re.match(db_name_pattern, line)
-            if db_name_matches:
-                db_name = db_name_matches.group(1)
-                print("Set database name:", db_name)
-                continue
+
+    # with open(config_file, 'r') as config:
+    #     for line in config:
+    #         if line[0] == '#':  # Ignore rid of commends immediately
+    #             continue
+    #         db_login_matches = re.match(db_login_pattern, line)
+    #         if db_login_matches:
+    #             db_login = db_login_matches.group(1)
+    #             print("Set Username:", db_login)
+    #             continue
+    #         db_name_matches = re.match(db_name_pattern, line)
+    #         if db_name_matches:
+    #             db_name = db_name_matches.group(1)
+    #             print("Set database name:", db_name)
+    #             continue
     return (db_login, password, db_name)
 
 # read_secret()

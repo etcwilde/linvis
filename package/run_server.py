@@ -1,4 +1,4 @@
-#!/bin/python3
+#!/bin/env python3
 
 # Basic Tester program
 # Runs flask server on port 8080
@@ -12,7 +12,7 @@ from linvis import app
 
 DEBUG = True
 IP_ADDRESS = '0.0.0.0'
-PORT_NUMBER = 8080
+PORT_NUMBER = 80
 THREADED = False
 SECRET_KEY = os.urandom(24)
 

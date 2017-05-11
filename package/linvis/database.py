@@ -5,10 +5,16 @@ import psycopg2
 
 
 def connect_db(db_config):
-    return psycopg2.connect(database=db_config[2],
-                            user=db_config[0],
-                            password=pad_pass(db_config[1],
-                                              app.secret_key).decode('utf-8'))
+    print("Connecting to the database")
+    return psycopg2.connect(
+                database='postgres',
+                user='postgres',
+                host='gl-postgres')
+
+            # database=db_config[2],
+            #                 user=db_config[0],
+            #                 password=pad_pass(db_config[1],
+            #                                   app.secret_key).decode('utf-8'))
 
 
 def get_db():
