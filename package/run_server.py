@@ -13,8 +13,6 @@ from linvis import app
 DEBUG = True
 IP_ADDRESS = '0.0.0.0'
 PORT_NUMBER = 80
-THREADED = False
-SECRET_KEY = os.urandom(24)
+THREADED = True
 
-app.secret_key = SECRET_KEY
 app.run(host=IP_ADDRESS, port=PORT_NUMBER, debug=DEBUG, threaded=THREADED)
