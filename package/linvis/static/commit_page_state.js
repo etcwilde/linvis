@@ -488,11 +488,7 @@ $(document).ready( function() {
       });
 
     $("li[id=0]").click(function() {
-        $("#content").html("<div class='spinner'>"+
-                "<div class='spinner__item1'></div>"+
-                "<div class='spinner__item2'></div>"+
-                "<div class='spinner__item3'></div>"+
-                "<div class='spinner__item4'></div>");
+        spin($("#content"));
         if(!b_message_loaded) {
             $.get("/data/log/"+cid,function(data){message=data;});
             b_message_loaded = true;
@@ -504,11 +500,7 @@ $(document).ready( function() {
     });
 
     $("li[id=1]").click(function() {
-        $("#content").html("<div class='spinner'>"+
-                "<div class='spinner__item1'></div>"+
-                "<div class='spinner__item2'></div>"+
-                "<div class='spinner__item3'></div>"+
-                "<div class='spinner__item4'></div>");
+        spin($("#content"));
         if(!b_files_loaded)
             getFiles();
         else {
@@ -524,11 +516,7 @@ $(document).ready( function() {
         $("li[id=1]").addClass("active");
     });
     $("li[id=2]").click(function() {
-        $("#content").html("<div class='spinner'>"+
-                "<div class='spinner__item1'></div>"+
-                "<div class='spinner__item2'></div>"+
-                "<div class='spinner__item3'></div>"+
-                "<div class='spinner__item4'></div>");
+        spin($("#content"));
         if(!b_modules_loaded)
             getModules();
         else {
@@ -547,41 +535,25 @@ $(document).ready( function() {
         $("li[id=2]").addClass("active");
     });
     $("li[id=3]").click(function() {
-        $("#content").html("<div class='spinner'>" +
-                "<div class='spinner__item1'></div>"+
-                "<div class='spinner__item2'></div>"+
-                "<div class='spinner__item3'></div>"+
-                "<div class='spinner__item4'></div>");
+        spin($("#content"));
         build_tree($('#list_tree'), tree_base);
         resetTabs();
         $("li[id=3]").addClass("active");
     });
     $("li[id=4]").click(function() {
-        $("#content").html("<div class='spinner'>" +
-                "<div class='spinner__item1'></div>"+
-                "<div class='spinner__item2'></div>"+
-                "<div class='spinner__item3'></div>"+
-                "<div class='spinner__item4'></div>");
+        spin($("#content"));
         build_bubble();
         resetTabs();
         $("li[id=4]").addClass("active");
     });
     $("li[id=5]").click(function() {
-        $("#content").html("<div class='spinner'>" +
-                           "<div class='spinner__item1'></div>"+
-                           "<div class='spinner__item2'></div>"+
-                           "<div class='spinner__item3'></div>"+
-                           "<div class='spinner__item4'></div>");
+        spin($("#content"));
         build_reingold();
         resetTabs();
         $("li[id=5]").addClass("active");
     });
     $("li[id=6]").click(function() {
-        $("#content").html("<div class='spinner'>" +
-                           "<div class='spinner__item1'></div>"+
-                           "<div class='spinner__item2'></div>"+
-                           "<div class='spinner__item3'></div>"+
-                           "<div class='spinner__item4'></div>");
+        spin($("#content"));
         getAuthors();
         resetTabs();
         $("li[id=6]").addClass("active");
