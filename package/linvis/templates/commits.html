@@ -1,13 +1,14 @@
 {% extends "heading.html" %}
 
 {% block head %}
+<script src="/static/utils/network.js" charset="utf-8"></script>
+<script src="/static/utils/processor.js" charset="utf-8"></script>
 <script src="/static/utils/spinner.js" charset="utf-8"></script>
 <script src="/static/commit_page_state.js"></script>
 <script src="/static/radix.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.15/d3.js"></script>
 {% if breadcrumbs %}
 <style> body{padding-top: 125px;}</style>
-<script>crumbs={{breadcrumbs|tojson|safe}}</script>
 {% endif %}
 {% endblock %}
 
@@ -16,15 +17,21 @@
     <ol class="breadcrumb", id="breadcrumbs">
     </ol>
     <script>
-var crumbTree = new RadixTree()
 var crumbs = {{breadcrumbs | tojson}};
 
-processCommits(function() {
-            bread_crumb_list.forEach(function(cv) {
-                $("#breadcrumbs").append($("<li></li>")
-                        .append($("<a></a>", {"href": '/commits/'+
-                            cv[0]}).append(cv[1])))
-        }) });
+$(document).ready(function(){
+    getTree(cid, function(tree){
+        getCrumbs(tree, cid, function(list){
+            list.forEach(function(cv) {
+                $("#breadcrumbs")
+                    .append($("<li></li>")
+                        .append($("<a></a>", {"href": '/commits/' + cv[0]})
+                            .append(cv[1])));
+            });
+        })
+    });
+});
+
     </script>
 {% endif %}
 {% endblock %}
