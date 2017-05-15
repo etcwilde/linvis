@@ -22,12 +22,33 @@ var crumbs = {{breadcrumbs | tojson}};
 
 $(document).ready(function(){
     let clearTabs = function() { $.map($('#nav-tabs').children('.active'), function(el){ $(el).removeClass('active');}) }
+
+    // Show Commits Message
+    document.getElementById("0").addEventListener('click', function() {
+        clearTabs();
+        spin($("#content"));
+        $(this).addClass("active");
+        getLog(cid, function(message){
+            console.log(message);
+            let msg = $("<pre></pre>", {"id": "log"}).html(message);
+            $("#content").html(msg);
+        });
+    });
+
     // Show Files
     document.getElementById("1").addEventListener('click', function() {
         clearTabs();
         spin($("#content"));
         $(this).addClass("active");
         getFiles(cid, function(files) { processFiles(files, function(f) { drawFiles(f, $('#content'));})});
+    });
+
+    // Show the modules
+    document.getElementById("2").addEventListener('click', function(){
+        clearTabs();
+        spin($("#content"));
+        $(this).addClass("active");
+        getModules(cid, function(mods){ processModules(mods, function(m){ drawModules(m, $('#content'))})})
     });
 
     // Show the authors
@@ -38,13 +59,7 @@ $(document).ready(function(){
         getTree(cid, function(t) { getBase(t, function(base) { getAuthors(cid, function(authors) { processAuthors(base, authors, function(a) {drawAuthors(a, $('#content'))}) })}) } );
     });
 
-    // Show the modules
-    document.getElementById("2").addEventListener('click', function(){
-        clearTabs();
-        spin($("#content"));
-        $(this).addClass("active");
-        getModules(cid, function(mods){ processModules(mods, function(m){ drawModules(m, $('#content'))})})
-    });
+    document.getElementById("0").click();
 
     getTree(cid, function(tree){
         getCrumbs(tree, cid, function(list){

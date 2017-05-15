@@ -27,6 +27,15 @@ var request = function(req) {
  * Get actions
  */
 
+var getLog = function(cid, callback) {
+    if (cid == undefined || callback == undefined) return;
+    let req = {
+        url: "/data/log/" + cid,
+        success: function(data) { callback(data); },
+        error: console.error};
+    request(req);
+}
+
 // Tree
 var getTree = function(cid, callback) {
     if (cid == undefined || callback == undefined) return;
@@ -46,7 +55,6 @@ var getFiles = function(cid, callback) {
         error: console.error};
     request(req);
 }
-
 
 // Authors
 var getAuthors = function(cid, callback) {
