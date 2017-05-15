@@ -92,12 +92,11 @@ var processModules = function(data, callback) {
     let moduleData = {};
     readTree(data, function(c){
         let module = c.module;
+        if (module === null || module == "") return
         if (module in moduleData) {
             moduleData[module].count++;
             moduleData[module].cids.push(c.cid);
-        } else {
-            moduleData[module] = {'module': module, 'count': 1, 'cids': [c.cid]};
-        }
+        } else moduleData[module] = {'module': module, 'count': 1, 'cids': [c.cid]};
     });
     callback(moduleData);
 }
