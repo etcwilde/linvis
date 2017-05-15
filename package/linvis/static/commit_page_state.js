@@ -18,61 +18,6 @@ var b_message_loaded = false;
 
 var message = "";
 
-// function getFiles() {
-//   $.get("/data/files/JSON/" + cid, function(data) {
-//     files = [];
-//     var remaining_items = [jQuery.parseJSON(data)];
-//     var firewood = {};
-//     var cids = [];
-//     while(remaining_items.length > 0) {
-//       var item = remaining_items.shift();
-//       cids.push(item.cid);
-//       var children = [];
-//       for (var i = 0; i < item.children.length; i++) {
-//         remaining_items.push(item.children[i]);
-//         children.push(item.children[i].cid);
-//       }
-//       firewood[item.cid] = {
-//         'cid': item.cid,
-//         'children': children,
-//         'files': item.files};
-//     }
-
-//     var tmp_files = {};
-//     // Now stack those logs!
-//     while (cids.length > 0) {
-//       var log_tag = cids.shift(); // Apparently logs have names...
-//       for (var i = 0; i < firewood[log_tag].files.length; i++) {
-//         if (firewood[log_tag].files[i][0] in tmp_files) {
-//           tmp_files[firewood[log_tag].files[i][0]].added += firewood[log_tag].files[i][1];
-//           tmp_files[firewood[log_tag].files[i][0]].removed += firewood[log_tag].files[i][2];
-//           tmp_files[firewood[log_tag].files[i][0]].cids.push(log_tag);
-//         } else {
-//           if (firewood[log_tag].files[i][0] === null) continue;
-//           tmp_files[firewood[log_tag].files[i][0]] = {
-//             'filename': firewood[log_tag].files[i][0],
-//             'added': firewood[log_tag].files[i][1],
-//             'removed': firewood[log_tag].files[i][2],
-//             'cids': [log_tag]};
-//         }
-//       }
-//     }
-//     for (var key in tmp_files)
-//       files.push([key, tmp_files[key].added, tmp_files[key].removed]);
-//   }).success(function() {
-//     b_files_loaded = true;
-//     $('#content').html($("<table></table>", { "id": "file-table",
-//                                               "class": "display table table-striped table-bordered",
-//                                               "width": "100%"}));
-//     $('table[id=file-table]').DataTable({
-//       data: files,
-//       columns: [
-//         {title: "Filename" },
-//         {title: "Added"},
-//         {title: "Removed"}]});
-//   });
-// }
-
 // Base is location in DOM
 // root is location in tree
 // function build_list_tree(base, root) {
@@ -106,51 +51,6 @@ var message = "";
 //     }
 //     if (typeof tree_base === "undefined") { get_treeBase(bt); } else { bt(); }
 // }
-
-// function getAuthors() {
-//     var build_authors = function() {
-//         $.get("/data/authors/JSON/" + cid, function(data) {
-//             data = jQuery.parseJSON(data);
-//             var authKeys = {};
-//             var remaining_items = [tree_base];
-//             var firewood = {};
-//             var cids = [];
-//             while(remaining_items.length > 0) {
-//                 var item = remaining_items.shift();
-//                 var children = [];
-//                 for (var key in item.children) {
-//                     if (key in data && data[key].author in authKeys) {
-//                         authKeys[data[key].author].added += data[key].added;
-//                         authKeys[data[key].author].removed +=  data[key].removed;
-//                     } else if (key in data) {
-//                         authKeys[data[key].author] = data[key];
-//                     }
-//                     remaining_items.push(item.children[key]);
-//                 }
-//             }
-//             var authors = [];
-//             for (var a in authKeys) {
-//                 authors.push([a, authKeys[a].added, authKeys[a].removed, authKeys[a].added - authKeys[a].removed, authKeys[a].added + authKeys[a].removed]);
-//             }
-//             $('#content').html($("<table></table>", { "id": "author-table",
-//                 "class": "display table table-striped table-bordered",
-//                 "width": "100%"}));
-//             $('table[id=author-table]').DataTable({
-//                 data: authors,
-//                 columns: [  {title: "Author"},
-//                 {title: "Added"},
-//                 {title: "Removed"},
-//                 {title: "Delta"},
-//                 {title: "Total"}]});
-//         });
-//     }
-//     if (typeof tree_base === "undefined") {
-//         get_treeBase(build_authors);
-//     } else {
-//         build_authors();
-//     }
-// }
-
 
 // function build_reingold() {
 //     var tree_preview_node = $("<div></div>", {"id": "treePreview", "class": "container"});
@@ -502,22 +402,6 @@ function resetTabs() {
 //         $("li[id=0]").addClass("active");
 //     });
 
-//     $("li[id=1]").click(function() {
-//         spin($("#content"));
-//         if(!b_files_loaded)
-//             getFiles();
-//         else {
-//             $('#content').html("<table id=\"file-table\" class=\"display table table-striped table-bordered\" width=100%></table>");
-//             $('table[id=file-table]').DataTable( {
-//                 data: files,
-//                 columns: [
-//                 {title: "Filename" },
-//                 {title: "Added"},
-//                 {title: "Removed"}]});
-//         }
-//         resetTabs();
-//         $("li[id=1]").addClass("active");
-//     });
 //     $("li[id=2]").click(function() {
 //         spin($("#content"));
 //         if(!b_modules_loaded)

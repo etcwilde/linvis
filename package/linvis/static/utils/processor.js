@@ -42,8 +42,27 @@ var getCrumbs = function(tree, cid, callback) {
     callback(breadcrumbs);
 }
 
-var processFiles = function(base) {
-    console.log(data);
+/*
+ * Handles the raw data for the files
+ */
+var processFiles = function(base, data, callback) {
+    let fileData = {};
+    readTree(data, function(c){
+        for (var file in c.files) {
+            let fname = c.files[file][0],
+                added = c.files[file][1],
+                removed = c.files[file][2];
+            if (fname == null) continue;
+            if (fname in fileData) {
+                fileData[fname].added += added;
+                fileData[fname].removed += removed;
+                fileData[fname].cids.push({'cid': c.cid, 'added': added, 'removed': removed});
+            } else {
+                fileData[fname] = {'fname': fname, 'added': added, 'removed': removed, 'cids': [{'cid': c.cid, 'added': added, 'removed': removed}]};
+            }
+        }
+    });
+    callback(fileData);
 }
 
 /*

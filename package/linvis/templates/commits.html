@@ -21,13 +21,19 @@
 var crumbs = {{breadcrumbs | tojson}};
 
 $(document).ready(function(){
+    // Show Files
+    document.getElementById("1").addEventListener('click', function() {
+        spin($("#content"));
+        $(this).addClass("active");
+        getTree(cid, function(t) { getBase(t, function(base) { getFiles(cid, function(files) { processFiles(base, files, function(f){ drawFiles(f, $('#content'))}) })})});
+    });
+
     // Show the authors
     document.getElementById("6").addEventListener("click", function() {
         spin($("#content"));
         $(this).addClass("active");
         getTree(cid, function(t) { getBase(t, function(base) { getAuthors(cid, function(authors) { processAuthors(base, authors, function(a) {drawAuthors(a, $('#content'))}) })}) } );
     });
-
 
     getTree(cid, function(tree){
         getCrumbs(tree, cid, function(list){
