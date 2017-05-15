@@ -4,6 +4,7 @@
 <script src="/static/utils/network.js" charset="utf-8"></script>
 <script src="/static/utils/processor.js" charset="utf-8"></script>
 <script src="/static/utils/spinner.js" charset="utf-8"></script>
+<script src="/static/views/authors.js" charset="utf-8"></script>
 <script src="/static/commit_page_state.js"></script>
 <script src="/static/radix.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.15/d3.js"></script>
@@ -20,6 +21,14 @@
 var crumbs = {{breadcrumbs | tojson}};
 
 $(document).ready(function(){
+    // Show the authors
+    document.getElementById("6").addEventListener("click", function() {
+        spin($("#content"));
+        $(this).addClass("active");
+        getTree(cid, function(t) { getBase(t, function(base) { getAuthors(cid, function(authors) { processAuthors(base, authors, function(a) {drawAuthors(a, $('#content'))}) })}) } );
+    });
+
+
     getTree(cid, function(tree){
         getCrumbs(tree, cid, function(list){
             list.forEach(function(cv) {

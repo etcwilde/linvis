@@ -478,87 +478,81 @@ function resetTabs() {
 // }
 
 // Initialize
-$(document).ready( function() {
+// $(document).ready( function() {
 
-    // Found it!
-    if(cid) $.get("/data/log/"+cid,function(data){message=data;})
-      .success(function() {
-        b_message_loaded = true;
-        $("li[id=0]").addClass("active");
-        $("#content").html("<pre id=\"log\">");
-        $("pre[id='log']").html(message);
-        // processCommits();
-      });
+//     // Found it!
+//     if(cid) $.get("/data/log/"+cid,function(data){message=data;})
+//       .success(function() {
+//         b_message_loaded = true;
+//         $("li[id=0]").addClass("active");
+//         $("#content").html("<pre id=\"log\">");
+//         $("pre[id='log']").html(message);
+//         // processCommits();
+//       });
 
-    $("li[id=0]").click(function() {
-        spin($("#content"));
-        if(!b_message_loaded) {
-            $.get("/data/log/"+cid,function(data){message=data;});
-            b_message_loaded = true;
-        }
-        $("#content").html("<pre id=\"log\">");
-        $("pre[id='log']").html(message);
-        resetTabs();
-        $("li[id=0]").addClass("active");
-    });
+//     $("li[id=0]").click(function() {
+//         spin($("#content"));
+//         if(!b_message_loaded) {
+//             $.get("/data/log/"+cid,function(data){message=data;});
+//             b_message_loaded = true;
+//         }
+//         $("#content").html("<pre id=\"log\">");
+//         $("pre[id='log']").html(message);
+//         resetTabs();
+//         $("li[id=0]").addClass("active");
+//     });
 
-    $("li[id=1]").click(function() {
-        spin($("#content"));
-        if(!b_files_loaded)
-            getFiles();
-        else {
-            $('#content').html("<table id=\"file-table\" class=\"display table table-striped table-bordered\" width=100%></table>");
-            $('table[id=file-table]').DataTable( {
-                data: files,
-                columns: [
-                {title: "Filename" },
-                {title: "Added"},
-                {title: "Removed"}]});
-        }
-        resetTabs();
-        $("li[id=1]").addClass("active");
-    });
-    $("li[id=2]").click(function() {
-        spin($("#content"));
-        if(!b_modules_loaded)
-            getModules();
-        else {
-            $('#content').html(
-                    $("<table></table>")
-                    .attr("id", "module-table")
-                    .attr("class", "display table table-striped table-bordered")
-                    .attr("width", "100%"));
-            $('table[id=module-table]').DataTable({
-                data: modules,
-                columns: [
-                {title: "Module"},
-                {title: "Count"}]});
-        }
-        resetTabs();
-        $("li[id=2]").addClass("active");
-    });
-    $("li[id=3]").click(function() {
-        spin($("#content"));
-        build_tree($('#list_tree'), tree_base);
-        resetTabs();
-        $("li[id=3]").addClass("active");
-    });
-    $("li[id=4]").click(function() {
-        spin($("#content"));
-        build_bubble();
-        resetTabs();
-        $("li[id=4]").addClass("active");
-    });
-    $("li[id=5]").click(function() {
-        spin($("#content"));
-        build_reingold();
-        resetTabs();
-        $("li[id=5]").addClass("active");
-    });
-    $("li[id=6]").click(function() {
-        spin($("#content"));
-        getAuthors();
-        resetTabs();
-        $("li[id=6]").addClass("active");
-    });
-});
+//     $("li[id=1]").click(function() {
+//         spin($("#content"));
+//         if(!b_files_loaded)
+//             getFiles();
+//         else {
+//             $('#content').html("<table id=\"file-table\" class=\"display table table-striped table-bordered\" width=100%></table>");
+//             $('table[id=file-table]').DataTable( {
+//                 data: files,
+//                 columns: [
+//                 {title: "Filename" },
+//                 {title: "Added"},
+//                 {title: "Removed"}]});
+//         }
+//         resetTabs();
+//         $("li[id=1]").addClass("active");
+//     });
+//     $("li[id=2]").click(function() {
+//         spin($("#content"));
+//         if(!b_modules_loaded)
+//             getModules();
+//         else {
+//             $('#content').html(
+//                     $("<table></table>")
+//                     .attr("id", "module-table")
+//                     .attr("class", "display table table-striped table-bordered")
+//                     .attr("width", "100%"));
+//             $('table[id=module-table]').DataTable({
+//                 data: modules,
+//                 columns: [
+//                 {title: "Module"},
+//                 {title: "Count"}]});
+//         }
+//         resetTabs();
+//         $("li[id=2]").addClass("active");
+//     });
+//     $("li[id=3]").click(function() {
+//         spin($("#content"));
+//         build_tree($('#list_tree'), tree_base);
+//         resetTabs();
+//         $("li[id=3]").addClass("active");
+//     });
+//     $("li[id=4]").click(function() {
+//         spin($("#content"));
+//         build_bubble();
+//         resetTabs();
+//         $("li[id=4]").addClass("active");
+//     });
+//     $("li[id=5]").click(function() {
+//         spin($("#content"));
+//         build_reingold();
+//         resetTabs();
+//         $("li[id=5]").addClass("active");
+//     });
+// });
