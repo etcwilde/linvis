@@ -45,7 +45,7 @@ var getCrumbs = function(tree, cid, callback) {
 /*
  * Handles the raw data for the files
  */
-var processFiles = function(base, data, callback) {
+var processFiles = function(data, callback) {
     let fileData = {};
     readTree(data, function(c){
         for (var file in c.files) {
@@ -86,4 +86,18 @@ var processAuthors = function(base, data, callback) {
         }
     });
     callback(authKeys);
+}
+
+var processModules = function(data, callback) {
+    let moduleData = {};
+    readTree(data, function(c){
+        let module = c.module;
+        if (module in moduleData) {
+            moduleData[module].count++;
+            moduleData[module].cids.push(c.cid);
+        } else {
+            moduleData[module] = {'module': module, 'count': 1, 'cids': [c.cid]};
+        }
+    });
+    callback(moduleData);
 }

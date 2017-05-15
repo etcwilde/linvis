@@ -35,3 +35,20 @@ var drawFiles = function(files, pane) {
         ]
     });
 }
+
+var drawModules = function(modules, pane) {
+    let data = $.map(modules, function(value, index) { return [value];});
+    let tab = $("<table></table>", {"id": "module-table",
+        "class": "display table table-striped table-bordered",
+        "width": "100%"});
+    pane.html(tab);
+    tab.DataTable({
+        data: data,
+        columns: [
+            {title: 'Module', data: 'module'},
+            {title: 'Count', data: 'count'}
+        ]
+    });
+
+
+}

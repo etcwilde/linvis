@@ -1,5 +1,6 @@
 /*
  * Evan Wilde <etcwilde@uvic.ca>
+ * May 13, 2017
  */
 
 /*
@@ -53,6 +54,16 @@ var getAuthors = function(cid, callback) {
     let req = {
         url: "/data/authors/JSON/" + cid,
         success: function(data) { callback(jQuery.parseJSON(data)); },
+        error: console.error};
+    request(req);
+}
+
+// Modules
+var getModules = function(cid, callback) {
+    if (cid == undefined || callback == undefined) return;
+    let req = {
+        url: '/data/modules/JSON/' + cid,
+        success: function(data) { callback(jQuery.parseJSON(data));},
         error: console.error};
     request(req);
 }

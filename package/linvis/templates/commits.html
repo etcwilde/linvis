@@ -27,7 +27,7 @@ $(document).ready(function(){
         clearTabs();
         spin($("#content"));
         $(this).addClass("active");
-        getTree(cid, function(t) { getBase(t, function(base) { getFiles(cid, function(files) { processFiles(base, files, function(f){ drawFiles(f, $('#content'))}) })})});
+        getFiles(cid, function(files) { processFiles(files, function(f) { drawFiles(f, $('#content'));})});
     });
 
     // Show the authors
@@ -36,6 +36,14 @@ $(document).ready(function(){
         spin($("#content"));
         $(this).addClass("active");
         getTree(cid, function(t) { getBase(t, function(base) { getAuthors(cid, function(authors) { processAuthors(base, authors, function(a) {drawAuthors(a, $('#content'))}) })}) } );
+    });
+
+    // Show the modules
+    document.getElementById("2").addEventListener('click', function(){
+        clearTabs();
+        spin($("#content"));
+        $(this).addClass("active");
+        getModules(cid, function(mods){ processModules(mods, function(m){ drawModules(m, $('#content'))})})
     });
 
     getTree(cid, function(tree){
