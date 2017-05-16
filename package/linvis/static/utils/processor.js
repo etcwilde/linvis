@@ -13,8 +13,10 @@ var readTree = function(tree, operation) {
     let remaining_el = [tree];
     while (remaining_el.length > 0) {
         let el = remaining_el.shift();
-        operation(el);
-        for (var c in el.children) { remaining_el.push(el.children[c]); }
+        if (operation !== undefined) operation(el);
+        if (el.children == undefined) continue;
+        else if (Object.prototype.toString.call(el.children) === '[object Array]') remaining_el = remaining_el.concat(el.children);
+        else { for (var c in el.children) { remaining_el.push(el.children[c]); } }
     }
 }
 
