@@ -7,6 +7,7 @@
 <script src="/static/views.js" charset="utf-8"></script>
 <script src="/static/ReinGoldTree.js" charset="utf-8"></script>
 <script src="/static/BubbleTree.js" charset="utf-8"></script>
+<script src="/static/ListTree.js" charset="utf-8"></script>
 <script src="/static/commit_page_state.js"></script>
 <script src="/static/radix.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.15/d3.js"></script>
@@ -50,6 +51,14 @@ $(document).ready(function(){
         spin($("#content"));
         $(this).addClass("active");
         getModules(cid, function(mods){ processModules(mods, function(m){ drawModules(m, $('#content'))})})
+    });
+
+    // Show List Tree
+    document.getElementById("3").addEventListener('click', function() {
+        clearTabs();
+        spin($("#content"));
+        $(this).addClass('active');
+        getTree(cid, function(t) { getBase(t, function(root) { $('#content').html(''); BuildListTree(root, $('#content')); })});
     });
 
     // Show Bubble Tree
