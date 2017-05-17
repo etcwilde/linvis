@@ -6,6 +6,7 @@
 <script src="/static/utils/spinner.js" charset="utf-8"></script>
 <script src="/static/views.js" charset="utf-8"></script>
 <script src="/static/ReinGoldTree.js" charset="utf-8"></script>
+<script src="/static/BubbleTree.js" charset="utf-8"></script>
 <script src="/static/commit_page_state.js"></script>
 <script src="/static/radix.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.15/d3.js"></script>
@@ -51,6 +52,48 @@ $(document).ready(function(){
         getModules(cid, function(mods){ processModules(mods, function(m){ drawModules(m, $('#content'))})})
     });
 
+    // Show Bubble Tree
+    document.getElementById("4").addEventListener('click', function() {
+        clearTabs();
+        spin($("#content"));
+        $(this).addClass("active");
+        getTree(cid, function(tree){
+            var treeRoot;
+            var previewNode = $("<div></div>", {"id": "treePreview", "class": "container"});
+            var treeViewNode = $("<div></div>", {"id": "treeView", "class": "container"});
+
+            readTree(tree, function(el) {
+                if (el.cid == cid) treeRoot = el;
+                if (el.children != undefined) {
+                    let d = $.map(el.children, function(value) { return [value];});
+                    el.children = d;
+                }
+            });
+
+            function updatePreview(d) {
+                previewNode.html("");
+                previewNode
+                .show()
+                .append($("<p></p>").html($("<a></a>", {'href' : "/commits/" + d.cid}).html(d.name)))
+                .append($("<p></p>").html(d.author));
+            }
+            let size = Math.min($('#nav-tabs').width(), $('#nav-tabs').width() * ( window.innerHeight / window.innerWidth ));
+            BuildBubbleTree(
+                tree,
+                treeRoot,
+                d3.select(treeViewNode.get(0)),
+                size,
+                size,
+                updatePreview, updatePreview);
+
+            $("#content").html("");
+            $("#content").append(previewNode);
+            $("#content").append(treeViewNode);
+
+        })
+    })
+
+    // Show ReinGoldTree Tilford tree
     document.getElementById("5").addEventListener("click", function(){
         clearTabs();
         spin($("#content"));
@@ -67,10 +110,6 @@ $(document).ready(function(){
                     el.children = d;
                 }
             });
-            let rTree = new ReingoldTree(tree, treeRoot);
-            $("#content").html("");
-            $("#content").append(previewNode);
-            $("#content").append(treeViewNode);
 
             function updatePreview(d) {
                 console.log(d);
@@ -81,10 +120,17 @@ $(document).ready(function(){
                 .append($("<p></p>").html(d.author));
             }
 
-            rTree.draw(d3.select(treeViewNode.get(0)),
-            $('#nav-tabs').width(),
-            $('#nav-tabs').width() * ( window.innerHeight / window.innerWidth ),
-            updatePreview, updatePreview);
+            BuildReingoldTree(
+                tree,
+                treeRoot,
+                d3.select(treeViewNode.get(0)),
+                $('#nav-tabs').width(),
+                $('#nav-tabs').width() * ( window.innerHeight / window.innerWidth ),
+                updatePreview, updatePreview);
+
+            $("#content").html("");
+            $("#content").append(previewNode);
+            $("#content").append(treeViewNode);
         });
     });
 
