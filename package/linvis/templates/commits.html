@@ -1,12 +1,17 @@
 {% extends "heading.html" %}
 
 {% block head %}
-<script src="/static/commit_page_state.js"></script>
+<script src="/static/utils/network.js" charset="utf-8"></script>
+<script src="/static/utils/processor.js" charset="utf-8"></script>
+<script src="/static/utils/spinner.js" charset="utf-8"></script>
+<script src="/static/views.js" charset="utf-8"></script>
+<script src="/static/ReinGoldTree.js" charset="utf-8"></script>
+<script src="/static/BubbleTree.js" charset="utf-8"></script>
+<script src="/static/ListTree.js" charset="utf-8"></script>
 <script src="/static/radix.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.15/d3.js"></script>
 {% if breadcrumbs %}
 <style> body{padding-top: 125px;}</style>
-<script>crumbs={{breadcrumbs|tojson|safe}}</script>
 {% endif %}
 {% endblock %}
 
@@ -15,15 +20,151 @@
     <ol class="breadcrumb", id="breadcrumbs">
     </ol>
     <script>
-var crumbTree = new RadixTree()
 var crumbs = {{breadcrumbs | tojson}};
 
-processCommits(function() {
-            bread_crumb_list.forEach(function(cv) {
-                $("#breadcrumbs").append($("<li></li>")
-                        .append($("<a></a>", {"href": '/commits/'+
-                            cv[0]}).append(cv[1])))
-        }) });
+$(document).ready(function(){
+    let clearTabs = function() { $.map($('#nav-tabs').children('.active'), function(el){ $(el).removeClass('active');}) }
+
+    // Show Commits Message
+    document.getElementById("0").addEventListener('click', function() {
+        clearTabs();
+        spin($("#content"));
+        $(this).addClass("active");
+        getLog(cid, function(message){
+            let msg = $("<pre></pre>", {"id": "log"}).html(message);
+            $("#content").html(msg);
+        });
+    });
+
+    // Show Files
+    document.getElementById("1").addEventListener('click', function() {
+        clearTabs();
+        spin($("#content"));
+        $(this).addClass("active");
+        getFiles(cid, function(files) { processFiles(files, function(f) { drawFiles(f, $('#content'));})});
+    });
+
+    // Show the modules
+    document.getElementById("2").addEventListener('click', function(){
+        clearTabs();
+        spin($("#content"));
+        $(this).addClass("active");
+        getModules(cid, function(mods){ processModules(mods, function(m){ drawModules(m, $('#content'))})})
+    });
+
+    // Show List Tree
+    document.getElementById("3").addEventListener('click', function() {
+        clearTabs();
+        spin($("#content"));
+        $(this).addClass('active');
+        getTree(cid, function(t) { getBase(t, function(root) { $('#content').html(''); BuildListTree(root, $('#content')); })});
+    });
+
+    // Show Bubble Tree
+    document.getElementById("4").addEventListener('click', function() {
+        clearTabs();
+        spin($("#content"));
+        $(this).addClass("active");
+        getTree(cid, function(tree){
+            var treeRoot;
+            var previewNode = $("<div></div>", {"id": "treePreview", "class": "container"});
+            var treeViewNode = $("<div></div>", {"id": "treeView", "class": "container"});
+
+            readTree(tree, function(el) {
+                if (el.cid == cid) treeRoot = el;
+                if (el.children != undefined) {
+                    let d = $.map(el.children, function(value) { return [value];});
+                    el.children = d;
+                }
+            });
+
+            function updatePreview(d) {
+                previewNode.html("");
+                previewNode
+                .show()
+                .append($("<p></p>").html($("<a></a>", {'href' : "/commits/" + d.cid}).html(d.name)))
+                .append($("<p></p>").html(d.author));
+            }
+            let size = Math.min($('#nav-tabs').width(), $('#nav-tabs').width() * ( window.innerHeight / window.innerWidth ));
+            BuildBubbleTree(
+                tree,
+                treeRoot,
+                d3.select(treeViewNode.get(0)),
+                size,
+                size,
+                updatePreview, updatePreview);
+
+            $("#content").html("");
+            $("#content").append(previewNode);
+            $("#content").append(treeViewNode);
+
+        })
+    })
+
+    // Show ReinGoldTree Tilford tree
+    document.getElementById("5").addEventListener("click", function(){
+        clearTabs();
+        spin($("#content"));
+        $(this).addClass("active");
+        getTree(cid, function(tree){
+            var treeRoot;
+            var previewNode = $("<div></div>", {"id": "treePreview", "class": "container"});
+            var treeViewNode = $("<div></div>", {"id": "treeView", "class": "container"});
+
+            readTree(tree, function(el) {
+                if (el.cid == cid) treeRoot = el;
+                if (el.children != undefined) {
+                    let d = $.map(el.children, function(value) { return [value];});
+                    el.children = d;
+                }
+            });
+
+            function updatePreview(d) {
+                console.log(d);
+                previewNode.html("");
+                previewNode
+                .show()
+                .append($("<p></p>").html($("<a></a>", {'href' : "/commits/" + d.cid}).html(d.name)))
+                .append($("<p></p>").html(d.author));
+            }
+
+            BuildReingoldTree(
+                tree,
+                treeRoot,
+                d3.select(treeViewNode.get(0)),
+                $('#nav-tabs').width(),
+                $('#nav-tabs').width() * ( window.innerHeight / window.innerWidth ),
+                updatePreview, updatePreview);
+
+            $("#content").html("");
+            $("#content").append(previewNode);
+            $("#content").append(treeViewNode);
+        });
+    });
+
+    // Show the authors
+    document.getElementById("6").addEventListener("click", function() {
+        clearTabs();
+        spin($("#content"));
+        $(this).addClass("active");
+        getTree(cid, function(t) { getBase(t, function(base) { getAuthors(cid, function(authors) { processAuthors(base, authors, function(a) {drawAuthors(a, $('#content'))}) })}) } );
+    });
+
+    document.getElementById("0").click(); // Show commit message by default
+
+    // Load breadcrumbs
+    getTree(cid, function(tree){
+        getCrumbs(tree, cid, function(list){
+            list.forEach(function(cv) {
+                $("#breadcrumbs")
+                    .append($("<li></li>")
+                        .append($("<a></a>", {"href": '/commits/' + cv[0]})
+                            .append(cv[1])));
+            });
+        })
+    });
+});
+
     </script>
 {% endif %}
 {% endblock %}
@@ -33,7 +174,7 @@ processCommits(function() {
     {% if preview %}<div class="container"><h2>{{preview}}</h2></div>{% endif %}
     <div class="container-fluid container">
         <div class="panel-heading">
-            <ul class="nav nav-tabs" role="tablist">
+            <ul id="nav-tabs" class="nav nav-tabs" role="tablist">
                 <li id="0" role="presentation"><a>Message</a></li>
                 <li id="1" role="presentation"><a>Files</a></li>
                 <li id="2" role="presentation"><a>Modules</a></li>
