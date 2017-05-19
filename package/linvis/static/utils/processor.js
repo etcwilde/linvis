@@ -74,17 +74,25 @@ var processAuthors = function(base, data, callback) {
     let authKeys = {};
     readTree(base, function(c) {
         let key = c.cid;
-        if (key in data && data[key].author in authKeys) {
-            let auth = data[key].author;
-            authKeys[auth].added += data[key].added;
-            authKeys[auth].removed += data[key].removed;
-            authKeys[auth].files.push({'cid': data[key].cid, 'fname': data[key].fname, 'added': data[key].added, 'removed': data[key].removed});
-        } else if (key in data) {
-            let auth = data[key].author;
-            authKeys[auth] = data[key];
-            authKeys[auth].files = [{'cid': data[key].cid, 'fname': data[key].fname, 'added': data[key].added, 'removed': data[key].removed}];
-            delete authKeys[auth].cid;
-            delete authKeys[auth].fname;
+        // Oh for the love of all things holy
+        for (var i in data) {
+            let entry = data[i];
+            let id = entry.cid;
+            if (id != key) { continue; }
+            let author = entry.author
+                added = entry.added
+                removed = entry.removed;
+
+            if (author in authKeys) {
+                authKeys[author].added += entry.added;
+                authKeys[author].removed += entry.removed;
+                authKeys[author].files.push({'cid': entry.cid, 'fname': entry.fname, 'added': entry.added, 'removed': entry.removed});
+            } else {
+                authKeys[author] = entry;
+                authKeys[author].files = [{'cid': entry.cid, 'fname': entry.fname, 'added': entry.added, 'removed': entry.removed}];
+                delete authKeys[author].cid;
+                delete authKeys[author].fname;
+            }
         }
     });
     callback(authKeys);

@@ -90,7 +90,7 @@ SELECT    pathtomerge.cid,
           mnextmerge,
           mcidlinus,
           author,
-          FILE,
+          file,
           added,
           removed
 FROM      pathtomerge
@@ -190,9 +190,7 @@ def get_authors(cid):
                   "removed": removed,
                   "cid": mcid}
                  for mcid, mnext, mlinus, author, fname, added, removed in cur]
-
-    return json.dumps({item['cid']: item for item in items if item['fname'] is not None})
-
+    return json.dumps([item for item in items if item['fname'] is not None])
 
 q_moddata = """
 SELECT pathtomerge.cid, mnextmerge, mcidlinus, preview FROM
@@ -209,7 +207,6 @@ SELECT CASE WHEN EXISTS
 THEN (SELECT mcidlinus AS cid FROM pathtomerge WHERE cid = %(cid)s)
 ELSE %(cid)s END));
 """
-
 
 def get_mod_name(preview):
     if preview is None:
