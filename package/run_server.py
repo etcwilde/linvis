@@ -10,7 +10,7 @@
 import os
 from linvis import app
 
-DEBUG = True
+DEBUG = False
 IP_ADDRESS = '0.0.0.0'
 PORT_NUMBER = 80
 THREADED = True
