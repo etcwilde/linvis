@@ -1,15 +1,8 @@
 {% extends "heading.html" %}
 
 {% block head %}
-<script src="/static/utils/network.js" charset="utf-8"></script>
-<script src="/static/utils/processor.js" charset="utf-8"></script>
-<script src="/static/utils/spinner.js" charset="utf-8"></script>
-<script src="/static/views.js" charset="utf-8"></script>
-<script src="/static/ReinGoldTree.js" charset="utf-8"></script>
-<script src="/static/BubbleTree.js" charset="utf-8"></script>
-<script src="/static/ListTree.js" charset="utf-8"></script>
-<script src="/static/radix.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.15/d3.js"></script>
+
+<!-- <script src="/static/views.js" charset="utf-8"></script> -->
 {% if breadcrumbs %}
 <style> body{padding-top: 125px;}</style>
 {% endif %}
@@ -187,5 +180,14 @@ $(document).ready(function(){
         <div id="content" class="panel-body"></div>
     </div>
 </div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.15/d3.min.js"></script>
+{% assets filters='jsmin', output='gen/utils.min.js', 'utils/network.js', 'utils/processor.js', 'utils/spinner.js', 'utils/radix.js'%}
+<script type="text/javascript" src="{{ ASSET_URL }}" charset="utf-8"></script>
+{% endassets %}
+{% assets filters='jsmin', output='gen/trees.min.js', 'ListTree.js', 'BubbleTree.js', 'ReinGoldTree.js', 'views.js' %}
+<script type="text/javascript" src="{{ ASSET_URL }}" charset="utf-8"></script>
+{% endassets %}
+
 {% endblock %}
 

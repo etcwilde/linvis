@@ -1,5 +1,8 @@
 click==6.6
 Flask==0.11.1
+Flask-Assets==0.12
+jsmin==2.2.2
+cssmin==0.2.0
 itsdangerous==0.24
 Jinja2==2.8
 MarkupSafe==0.23

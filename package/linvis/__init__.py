@@ -1,10 +1,12 @@
 # from linvis.app import app
 
 from flask import Flask
+from flask_assets import Environment, Bundle
 import os
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
+assets = Environment(app)
 
 import linvis.views
 import linvis.data
