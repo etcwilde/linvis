@@ -1,0 +1,7 @@
+table td.details-control {
+	cursor: pointer;
+}
+
+table td.details-control span {
+	opacity: 0.8;
+}
