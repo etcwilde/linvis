@@ -1,12 +1,14 @@
 function BuildReingoldTree(data, treeRoot, pane, width, height, clickFunction, hoverFunction) {
 
-    var tree = d3.layout.tree().size([width, height])
+    var tree = d3.layout.tree()
         nodes = tree.nodes(data)
         links = tree.links(nodes);
 
     var max_width = 0
         levelWidth = []
         focus;
+
+    var radius = 15;
 
     readTree(data, function(el) {
         if (el.cid == cid) focus = el;
@@ -15,6 +17,12 @@ function BuildReingoldTree(data, treeRoot, pane, width, height, clickFunction, h
         while (el.depth >= levelWidth.length) levelWidth.push(0);
         levelWidth[el.depth] += el.children.length;
     });
+
+    // Rebuild tree with new size
+    tree = tree.size([d3.max(levelWidth) * radius * 4 + Math.pow(levelWidth.length - levelWidth.indexOf(d3.max(levelWidth)) * 2, 2), levelWidth.length * radius * 5 + d3.max(levelWidth)]);
+
+    nodes = tree.nodes(data)
+    links = tree.links(nodes);
 
     var color = d3.scale.linear()
         .domain([1, max_width])
@@ -75,7 +83,7 @@ function BuildReingoldTree(data, treeRoot, pane, width, height, clickFunction, h
         .append('circle')
         .attr('class', 'node')
         .attr('fill', function(d) { return d == focus ? '#fd6500' : d.children ? color(d.children.length) : 'white'; })
-        .attr('r', 15)
+        .attr('r', radius)
         .attr('transform', function(d){ return "translate("+d.x+","+d.y+")";})
         .style('cursor', 'pointer')
         .style('stroke', function(d) { return d.children ? color(d.children.length) : '000';})
