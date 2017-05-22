@@ -25,7 +25,7 @@ var drawAuthors = function(authors, pane) {
         ]
     });
 
-    var authorDetails = function(row, d) {
+    var authorDetails = function(d) {
         let tab = $('<table></table>',
             {   'id': 'nested-table',
                 'class': 'display table table-striped table-bordered',
@@ -59,7 +59,7 @@ var drawAuthors = function(authors, pane) {
             row.child.hide();
             $(this).html('<span class=\'glyphicon glyphicon-menu-right\'></span');
         } else {
-            row.child(authorDetails(tr, row.data())).show();
+            row.child(authorDetails(row.data())).show();
             $(this).html('<span class=\'glyphicon glyphicon-menu-down\'></span');
             $(this).parent().next().children().children().DataTable({});
         }
@@ -75,18 +75,58 @@ var drawFiles = function(files, pane) {
             "class": "display table table-striped table-bordered",
             "width": "100%"});
     pane.html(tab);
-    tab.DataTable({
+    let dataTable = tab.DataTable({
         data: data,
         columns: [
+            {orderable: false, className: 'details-control',  data: null, defaultContent: '<span class=\'glyphicon glyphicon-menu-right\'></span>'},
             {title: 'File', data: 'fname'},
             {title: 'Added', data: 'added'},
             {title: 'removed', data: 'removed'}
         ]
     });
+
+    var fileDetails = function(d) {
+        let tab = $('<table></table>',
+            {   'id': 'nested-table',
+                'class': 'display table table-striped table-bordered',
+                'width': '100%'});
+
+        let header = $('<thead></thead>').append(
+            $('<tr></tr>')
+            .append($('<td></td>').html('Commit'))
+            .append($('<td></td>').html('Lines Added'))
+            .append($('<td></td>').html('Lines Removed')));
+
+        let body = $('<tbody></tbody>');
+
+        for (var f in d.cids) {
+            let data = d.cids[f];
+            body.append($('<tr></tr>')
+                .append($('<td></td>').html($('<a></a>', {'href': '/commits/' + data.cid})
+                    .html(data.cid.substring(0, 10))))
+                .append($('<td></td>').html(data.added))
+                .append($('<td></td>').html(data.removed)));
+        }
+        return tab.append(header).append(body);
+    }
+
+    tab.on('click', 'td.details-control', function() {
+        let tr = $(this).closest('tr')
+            row = dataTable.row(tr);
+        if (row.child.isShown()) {
+            row.child.hide();
+            $(this).html('<span class=\'glyphicon glyphicon-menu-right\'></span');
+        } else {
+            row.child(fileDetails(row.data())).show();
+            $(this).html('<span class=\'glyphicon glyphicon-menu-down\'></span');
+            $(this).parent().next().children().children().DataTable({});
+        }
+    });
+
 }
 
 
-// Module pprocessor
+// Module processor
 var drawModules = function(modules, pane) {
     let data = $.map(modules, function(value, index) { return [value];});
     let tab = $("<table></table>", {"id": "module-table",
