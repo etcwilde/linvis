@@ -188,6 +188,9 @@ $(document).ready(function(){
 {% assets filters='jsmin', output='gen/trees.min.js', 'ListTree.js', 'BubbleTree.js', 'ReinGoldTree.js', 'views.js' %}
 <script type="text/javascript" src="{{ ASSET_URL }}" charset="utf-8"></script>
 {% endassets %}
+{% assets filters='cssmin', output='gen/views.css', 'views.css'%}
+<link rel="stylesheet" href="{{ ASSET_URL }}" type="text/css" media="all" />
+{% endassets %}
 
 {% endblock %}
 
