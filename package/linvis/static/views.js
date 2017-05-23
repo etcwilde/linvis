@@ -77,6 +77,7 @@ var drawFiles = function(files, pane) {
     pane.html(tab);
     let dataTable = tab.DataTable({
         data: data,
+        order: [[1, 'desc']],
         columns: [
             {orderable: false, className: 'details-control',  data: null, defaultContent: '<span class=\'glyphicon glyphicon-menu-right\'></span>'},
             {title: 'File', data: 'fname'},
@@ -135,6 +136,7 @@ var drawModules = function(modules, pane) {
     pane.html(tab);
     let dataTable = tab.DataTable({
         data: data,
+        order: [[1, 'desc']],
         columns: [
             {orderable: false, className: 'details-control',  data: null, defaultContent: '<span class=\'glyphicon glyphicon-menu-right\'></span>'},
             {title: 'Module', data: 'module'},
