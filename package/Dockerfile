@@ -7,11 +7,15 @@ LABEL maintainer Evan Wilde <etcwilde@uvic.ca>
 COPY req.txt /tmp/req.txt
 
 # Install packages and dependencies
-RUN apk add --no-cache python3 py3-psycopg2 && \
+RUN apk add --no-cache python3 uwsgi-python3 py3-psycopg2 && \
   pip3 install -r /tmp/req.txt && rm -r /root/.cache/pip/*
 
 # Copy Application
-COPY run_server.py /tmp/run_server.py
+COPY linvis.ini /tmp/linvis.ini
 COPY linvis/ /tmp/linvis
 
-CMD ["python3", "/tmp/run_server.py"]
+WORKDIR /tmp
+
+EXPOSE 5000
+
+CMD ["uwsgi", "linvis.ini"]
