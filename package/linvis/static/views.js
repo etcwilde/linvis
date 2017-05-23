@@ -133,13 +133,34 @@ var drawModules = function(modules, pane) {
         "class": "display table table-striped table-bordered",
         "width": "100%"});
     pane.html(tab);
-    tab.DataTable({
+    let dataTable = tab.DataTable({
         data: data,
         columns: [
+            {orderable: false, className: 'details-control',  data: null, defaultContent: '<span class=\'glyphicon glyphicon-menu-right\'></span>'},
             {title: 'Module', data: 'module'},
             {title: 'Count', data: 'count'}
         ]
     });
 
+    var moduleDetails = function(d) {
+        let root = $("<ul></ul>");
+        for (var i in d.cids) {
+            let cid = d.cids[i];
+            root.append($('<li></li>').html($('<a></a>', {'href': '/commits/' + cid}).html(cid.substring(0, 10))));
+        }
+        return root;
+    }
 
+    tab.on('click', 'td.details-control', function() {
+        let tr = $(this).closest('tr')
+            row = dataTable.row(tr);
+        if (row.child.isShown()) {
+            row.child.hide();
+            $(this).html('<span class=\'glyphicon glyphicon-menu-right\'></span');
+        } else {
+            row.child(moduleDetails(row.data())).show();
+            $(this).html('<span class=\'glyphicon glyphicon-menu-down\'></span');
+            // $(this).parent().next().children().children().DataTable({});
+        }
+    });
 }
