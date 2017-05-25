@@ -1,20 +1,13 @@
 from flask import g
-from linvis.app import app, pad_pass, db_config
-
+from linvis import app
 import psycopg2
 
 
-def connect_db(db_config):
-    print("Connecting to the database")
+def connect_db():
     return psycopg2.connect(
                 database='postgres',
                 user='postgres',
                 host='gl-postgres')
-
-            # database=db_config[2],
-            #                 user=db_config[0],
-            #                 password=pad_pass(db_config[1],
-            #                                   app.secret_key).decode('utf-8'))
 
 
 def get_db():
@@ -52,7 +45,7 @@ def query_db(query, args=(), one=False):
 
 @app.before_request
 def open_db():
-    g.db = connect_db(db_config)
+    g.db = connect_db()
 
 
 @app.teardown_request
