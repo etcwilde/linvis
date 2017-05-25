@@ -67,22 +67,6 @@ ON start_date.ver = end_date.ver)
 SELECT start_date AS start, release_date AS end FROM limits;
 """
 
-# q_filter_cids = \
-#     """
-# SELECT cid, preview, author, autdate, comdate FROM
-# logs NATURAL JOIN commits NATURAL JOIN
-# pathtomerge WHERE mcidlinus IN (SELECT a.cid FROM commits NATURAL JOIN (
-# SELECT mcidlinus AS cid FROM pathtomerge GROUP BY mcidlinus) AS a
-# WHERE {0}) {1}
-#
-# UNION ALL
-#
-# SELECT DISTINCT commits.cid, preview, author, autdate, comdate FROM
-# logs NATURAL JOIN commits JOIN pathtomerge
-#     ON pathtomerge.mcidlinus = commits.cid
-# WHERE {0} {1};
-# """
-
 q_filter_cids = \
     """
 SELECT cid, preview, author, autdate, comdate FROM
@@ -155,10 +139,8 @@ def gen_autdate_query(req):
         elif autdate_end:
             q_autdate_range = cur.mogrify('autdate <= %(end)s',
                                           {'end': autdate_end})
-            # "autdate <= '{1}'".format(autdate_end)
         else:
             q_autdate_range = "TRUE"
-    print("AUTDATE RANGE:", q_autdate_range)
     return q_autdate_range
 
 

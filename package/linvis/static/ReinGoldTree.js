@@ -34,7 +34,7 @@ function BuildReingoldTree(data, treeRoot, pane, width, height, clickFunction, h
     }
 
     function click(d) {
-        if (d3.event != null && d3.event.defaultPrevented) { console.log("Click prevented"); return; }
+        if (d3.event != null && d3.event.defaultPrevented) return;
         centerNode(d);
         focus = d;
         if (clickFunction !== undefined) clickFunction(d);

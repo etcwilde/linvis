@@ -281,13 +281,5 @@ def get_commits():
                   "author": author,
                   "comdate": str(comdate.date())}
                  for preview, cid, author, comdate in cur]
-        # items = [{"preview": "Test",
-        #           "cid": "12345",
-        #           "author": "Evan Wilde <etcwilde@uvic.ca>",
-        #           "comdate": "Today"}]
         o = {"data": items[0:500]}
-        # print(o)
         return json.dumps(o)
-    # print("getting commits")
-    # return "hello, from the server"
-    # "#SELECT * FROM commits
