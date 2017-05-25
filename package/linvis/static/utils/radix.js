@@ -151,13 +151,6 @@ RadixTree.prototype.find = function(path) {
     node_loop:
     while(node) {
         if (pathLength === offset) {
-            // if (par) {
-            //     console.log(par.path + node.path.charAt(0))
-                // result = {prefix: par.path + node.path.charAt(0),
-
-            // }
-            //
-
             let prefix_list = []
             prefix_list.push(node.path.charAt(0))
             let cur_node = node

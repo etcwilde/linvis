@@ -1,4 +1,4 @@
-from linvis.app import app
+from linvis import app
 from linvis.database import query_db
 from flask import render_template
 from flask import request

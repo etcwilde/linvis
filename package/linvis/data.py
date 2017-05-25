@@ -1,4 +1,4 @@
-from linvis.app import app
+from linvis import app
 from linvis.database import query_db, get_cursor
 import json
 
@@ -90,7 +90,7 @@ SELECT    pathtomerge.cid,
           mnextmerge,
           mcidlinus,
           author,
-          FILE,
+          file,
           added,
           removed
 FROM      pathtomerge
@@ -190,9 +190,7 @@ def get_authors(cid):
                   "removed": removed,
                   "cid": mcid}
                  for mcid, mnext, mlinus, author, fname, added, removed in cur]
-
-    return json.dumps({item['cid']: item for item in items if item['fname'] is not None})
-
+    return json.dumps([item for item in items if item['fname'] is not None])
 
 q_moddata = """
 SELECT pathtomerge.cid, mnextmerge, mcidlinus, preview FROM
@@ -209,7 +207,6 @@ SELECT CASE WHEN EXISTS
 THEN (SELECT mcidlinus AS cid FROM pathtomerge WHERE cid = %(cid)s)
 ELSE %(cid)s END));
 """
-
 
 def get_mod_name(preview):
     if preview is None:
@@ -284,13 +281,5 @@ def get_commits():
                   "author": author,
                   "comdate": str(comdate.date())}
                  for preview, cid, author, comdate in cur]
-        # items = [{"preview": "Test",
-        #           "cid": "12345",
-        #           "author": "Evan Wilde <etcwilde@uvic.ca>",
-        #           "comdate": "Today"}]
         o = {"data": items[0:500]}
-        # print(o)
         return json.dumps(o)
-    # print("getting commits")
-    # return "hello, from the server"
-    # "#SELECT * FROM commits
