@@ -15,10 +15,9 @@ def artifact():
     return render_template('artifact.html')
 
 
-@app.route('/commits/<cid>/<view_type>', methods=['GET', 'POST'])
 @app.route('/commits/<cid>', methods=['GET', 'POST'])
 @app.route('/commits/', methods=['GET', 'POST'])
-def get_cid(cid=None, view_type=None):
+def get_cid(cid=None):
     if not cid:
         return redirect('/')
     if request.method == 'POST':
@@ -27,27 +26,26 @@ def get_cid(cid=None, view_type=None):
         commit_tree = None
         commit_log_preview = ""
         breadcrumbs = None
+
+        if cid is None:
+            flash("cid: {0} Does not exist".format(cid), 'danger')
+            return render_template("commits.html")
+
         try:
             commit_log_preview = query_db("SELECT preview FROM logs WHERE\
                                           cid='{0}';".format(cid))[0][0]
         except IndexError:  # no query found
             flash("cid: {0} Does not exist".format(cid), 'danger')
             return render_template("commits.html")
+        except TypeError:
+            flash("Could not fetch commit {0} ".format(cid), 'danger')
+            return render_template("commits.html")
 
         breadcrumbs = linvis.searches.get_breadcrumbs(cid)
-        commit_log = None
-        if view_type == "files" or view_type == "modules" \
-                or view_type == "tree":
-            pass
-        else:
-            commit_log = query_db("SELECT \"full\" FROM logs WHERE cid = '{0}';\
-                                  ".format(cid))[0][0]
         return render_template("commits.html",
                                cid=cid,
-                               view_type=view_type,
                                breadcrumbs=breadcrumbs,
                                preview=commit_log_preview,
-                               log=commit_log,
                                tree=commit_tree)
 
 
