@@ -20,8 +20,10 @@ var drawAuthors = function(authors, pane) {
             {orderable: false, className: 'details-control',  data: null, defaultContent: '<span class=\'glyphicon glyphicon-menu-right\'></span>'},
             {title: 'Author', data: 'author'},
             {title: 'Files', data: 'files.length'},
-            {title: 'Added', data: 'added'},
-            {title: 'Removed', data: 'removed'}
+            {title: 'Lines Added', data: 'added'},
+            {title: 'Lines Removed', data: 'removed'},
+            {title: 'Total', data: function(d) { return d.added + d.removed; } },
+            {title: 'Delta', data: function(d) { return d.added - d.removed; } }
         ]
     });
 
@@ -36,7 +38,9 @@ var drawAuthors = function(authors, pane) {
             .append($('<td></td>').html('Commit'))
             .append($('<td></td>').html('Filename'))
             .append($('<td></td>').html('Lines Added'))
-            .append($('<td></td>').html('Lines Removed')));
+            .append($('<td></td>').html('Lines Removed'))
+            .append($('<td></td>').html('Total'))
+            .append($('<td></td>').html('Delta')));
 
         let body = $('<tbody></tbody>');
 
@@ -47,7 +51,9 @@ var drawAuthors = function(authors, pane) {
                     .html(data.cid.substring(0, 10))))
                 .append($('<td></td>').html(data.fname))
                 .append($('<td></td>').html(data.added))
-                .append($('<td></td>').html(data.removed)));
+                .append($('<td></td>').html(data.removed))
+                .append($('<td></td>').html(data.added + data.removed))
+                .append($('<td></td>').html(data.added - data.removed)));
         }
         return tab.append(header).append(body);
     }
@@ -81,8 +87,10 @@ var drawFiles = function(files, pane) {
         columns: [
             {orderable: false, className: 'details-control',  data: null, defaultContent: '<span class=\'glyphicon glyphicon-menu-right\'></span>'},
             {title: 'File', data: 'fname'},
-            {title: 'Added', data: 'added'},
-            {title: 'removed', data: 'removed'}
+            {title: 'Lines Added', data: 'added'},
+            {title: 'Lines Removed', data: 'removed'},
+            {title: 'Total', data: function(d) { return d.added + d.removed; }},
+            {title: 'Delta', data: function(d) { return d.added - d.removed; }}
         ]
     });
 
@@ -96,7 +104,9 @@ var drawFiles = function(files, pane) {
             $('<tr></tr>')
             .append($('<td></td>').html('Commit'))
             .append($('<td></td>').html('Lines Added'))
-            .append($('<td></td>').html('Lines Removed')));
+            .append($('<td></td>').html('Lines Removed'))
+            .append($('<td></td>').html('Total'))
+            .append($('<td></td>').html('Delta')));
 
         let body = $('<tbody></tbody>');
 
@@ -106,7 +116,9 @@ var drawFiles = function(files, pane) {
                 .append($('<td></td>').html($('<a></a>', {'href': '/commits/' + data.cid})
                     .html(data.cid.substring(0, 10))))
                 .append($('<td></td>').html(data.added))
-                .append($('<td></td>').html(data.removed)));
+                .append($('<td></td>').html(data.removed))
+                .append($('<td></td>').html(data.added + data.removed))
+                .append($('<td></td>').html(data.added - data.removed)));
         }
         return tab.append(header).append(body);
     }
