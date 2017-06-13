@@ -8,9 +8,26 @@
 -->
 
 {% block head %}
-<script src="/static/search.js"></script>
 {% if results %}<script>commits={{results|tojson|safe}};</script>{% endif %}
 {% endblock %}
 {% block body %}
 <div id="content" class="container container-fluid"> </div>
+<script charset="utf-8">
+$(document).ready(function(){
+    let tab = $("<table></table>", {
+        "id": 'search-results',
+        'class': 'display table table-striped table-bordered'})
+    $('#content').append(tab);
+    tab.DataTable({
+        data: commits,
+        order: [[ 0, "desc"]],
+        columns: [
+        {data: 'rank', title: "Rank"},
+        {data: 'preview', title: "Log",
+        "mRender": function(data, type, full){return "<a href=\"commits/"+full['cid']+"\">" + data;}},
+        {data: 'author', title: 'Author'},
+        {data: 'aut_date', title: "Authored Date"},
+        {data: 'com_date', title: 'Commit Date'}]});
+    });
+</script>
 {% endblock %}

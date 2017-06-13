@@ -14,5 +14,9 @@ pip-selfcheck.json
 app.conf
 secret_key
 
+# Server generated files
+package/linvis/static/gen/
+package/linvis/static/.webassets-cache/
+
 # Vim Generated Files
 *.sw*
