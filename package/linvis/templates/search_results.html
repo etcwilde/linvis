@@ -14,20 +14,78 @@
 <div id="content" class="container container-fluid"> </div>
 <script charset="utf-8">
 $(document).ready(function(){
-    let tab = $("<table></table>", {
-        "id": 'search-results',
-        'class': 'display table table-striped table-bordered'})
-    $('#content').append(tab);
-    tab.DataTable({
-        data: commits,
-        order: [[ 0, "desc"]],
-        columns: [
-        {data: 'rank', title: "Rank"},
-        {data: 'preview', title: "Log",
-        "mRender": function(data, type, full){return "<a href=\"commits/"+full['cid']+"\">" + data;}},
-        {data: 'author', title: 'Author'},
-        {data: 'aut_date', title: "Authored Date"},
-        {data: 'com_date', title: 'Commit Date'}]});
+    // Assign nodes to corresponding root
+    for(var el in commits[0]) commits[0][el].push([]);
+    commits[1].map(el => {
+        if (el.mcid == undefined) {
+            if (el.cid in commits[0]) commits[0][el.cid][3].push(el);
+            else commits[0][el.cid] = [el.preview, el.author, el.comdate, [el]];
+        } else commits[0][el.mcid][3].push(el);
     });
+
+    // Compute rank of tree
+    for(var el in commits[0]) commits[0][el].push(commits[0][el][3].reduce((acc, val) => acc + val.rank, 0) / commits[0][el][3].length);
+    let coms = [];
+    for(var el in commits[0])
+        coms
+            .push({
+                'cid': el,
+                'preview': commits[0][el][0],
+                'author': commits[0][el][1],
+                'comdate': commits[0][el][2],
+                'children': commits[0][el][3],
+                'rank': commits[0][el][4]
+                });
+    coms.sort((a, b) => { return a.rank > b.rank ? -1 : 1;})
+    commits = coms;
+
+    // Build tables
+    let content = $('#content');
+    commits.forEach(el => {
+        let div = $('<div></div>', {'class': 'panel panel-default', 'style': 'padding:0.5em'})
+            .append(
+                $("<div></div>", {'class': 'row', 'width': '90%',
+                'style': 'padding:0.5em;'})
+                    .append($("<div></div>", {'class': 'col-sm-6'})
+                        .append($("<h4></h4>")
+                            .html($("<a></a>", {'id': 'commit'+ el.cid, 'href': '/commits/' + el.cid})
+                            .html(el.preview))
+                        )
+                    )
+                    .append($("<div></div>", {'class': 'col-sm-3'})
+                        .append($("<h4></h4>")
+                            .html(el.author)
+                        )
+                    )
+                    .append($("<div></div>", {'class': 'col-sm-3'})
+                        .append($("<h4></h4>")
+                            .html(el.comdate)
+                        )
+                    )
+            );
+
+        let tab = $("<table></table>",
+                {"class": "display table table-striped table-bordered",
+                 "width": "100%"});
+
+
+
+        div.append(tab);
+        content.append(div);
+
+     let dataTable = tab.DataTable({
+            data: el.children,
+             order: [[0, 'desc']],
+            columns: [
+            {title: 'Rank', data: 'rank'},
+            {title: 'Preview', mRender: function(data, type, full) {
+                return "<a href=\"commits/"+full['cid']+"\">"+full.preview+ "</a>";
+                }},
+            {title: 'Author', data: 'author'}
+            ]
+        });
+    });
+
+});
 </script>
 {% endblock %}
