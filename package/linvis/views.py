@@ -23,14 +23,12 @@ def get_cid(cid=None):
     if request.method == 'POST':
         return redirect('commits/{0}'.format(request.form['cid']))
     if request.method == 'GET':
-        commit_tree = None
         commit_log_preview = ""
         breadcrumbs = None
 
         if cid is None:
             flash("cid: {0} Does not exist".format(cid), 'danger')
             return render_template("commits.html")
-
         try:
             commit_log_preview = query_db("SELECT preview FROM logs WHERE\
                                           cid='{0}';".format(cid))[0][0]
@@ -45,93 +43,28 @@ def get_cid(cid=None):
         return render_template("commits.html",
                                cid=cid,
                                breadcrumbs=breadcrumbs,
-                               preview=commit_log_preview,
-                               tree=commit_tree)
+                               preview=commit_log_preview)
 
 
-# TODO: Simplify this
-@app.route('/search')
+@app.route('/search', methods=['GET', 'POST'])
 def search():
-    version = request.args.get('version')
-    if version:  # Query made
-        # Get cids between those dates
-        results = []
-        if 'version' not in session or session['version'] != version:
-            session['version'] = version
-        search_type = request.args.get('search-type')
-        search_term = request.args.get('search-text')
-        comdate_query = linvis.searches.gen_comdate_query(request)
-        autdate_query = linvis.searches.gen_autdate_query(request)
-        if search_type == "Author" and search_term:
-            if request.args.get('merges'):
-                results = linvis.searches.merge_search_by_author(
-                    search_term,
-                    comdate_query,
-                    autdate_query)
-            else:
-                results = linvis.searches.search_by_author(
-                    search_term,
-                    comdate_query,
-                    autdate_query)
-        elif search_type == "Commit ID" and search_term:
-            if request.args.get('merges'):
-                results = linvis.searches.merge_search_by_cid(
-                    search_term,
-                    comdate_query,
-                    autdate_query)
-            else:
-                results = linvis.searches.search_by_cid(
-                    search_term,
-                    comdate_query,
-                    autdate_query)
-        elif search_type == "Log Keyword" and search_term:
-            if request.args.get('merges'):
-                results = linvis.searches.merge_search_by_preview(
-                    search_term,
-                    comdate_query,
-                    autdate_query)
-            else:
-                results = linvis.searches.search_by_preview(
-                    search_term,
-                    comdate_query,
-                    autdate_query)
-        elif not search_term:
-            if request.args.get('merges'):
-                results = linvis.searches.merge_search_by_date(
-                    comdate_query,
-                    autdate_query)
-            else:
-                results = linvis.searches.search_by_date(
-                    comdate_query,
-                    autdate_query)
-        else:
-            pass
-        # Results format:
-        # (cid, preview, author date, commit date, files changed)
+    form = linvis.searches.SearchForm(request.form)
+    if form.validate_on_submit():
+        parsed_query = linvis.searches.queryParser(form.query.data)
+        results = linvis.searches.performSearch(parsed_query)
         if results:
             results = [{
+                'rank': r,
                 'cid': c,
                 'preview': p,
                 'author': a,
-                'aut_date': ad.date().strftime("%m/%d/%Y"),
-                'com_date': cd.date().strftime("%m/%d/%Y")}
-                for c, p, a, ad, cd in results]
-        return render_template("search_results.html", results=results)
-    else:
-        # Grab all items are stip out the tuple
-        releases = [item[0] for item in
-                    query_db("SELECT ver FROM releases WHERE not candidate;")]
-        # Sort the releases in release order
-        # Remove the decimal point and convert to an int
-        # If Linux ever gets into release 10.x, this sort method will not work
-        # correctly 10.1 < 3.10
-        releases.sort(key=lambda x: int(x.split()[1].replace(".", "")))
-        if 'version' in session:
-            ver = session['version']
+                'aut_date': ad.date().strftime('%m/%d/%Y'),
+                'com_date': cd.date().strftime('%m/%d/%Y')}
+                for r, _, c, a, ad, cd, p in results ]
+            return render_template('search_results.html', results=results)
         else:
-            ver = None
-        return render_template("search.html", releases=releases[1:],
-                               version=ver)
+            flash("\"" + form.query.data + '" returned no results', 'info')
+    return render_template('search.html', form=form)
 
 
 @app.route('/')
