@@ -9,7 +9,7 @@
 
 {% block head %}
 {% if results %}<script>commits={{results|tojson|safe}};</script>{% endif %}
-{% assets output='gen/pagination.js', filter='jsmin', 'libs/pagination.js', 'search.js'%}
+{% assets output='gen/pagination.js', filters='jsmin', 'libs/pagination.js', 'search.js'%}
 <script type='text/javascript' src="{{ ASSET_URL }}" charset="utf-8"></script>
 {% endassets %}
 {% endblock %}
