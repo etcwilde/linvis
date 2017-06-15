@@ -9,25 +9,27 @@
 
 {% block head %}
 {% if results %}<script>commits={{results|tojson|safe}};</script>{% endif %}
+{% assets output='gen/pagination.js', filter='jsmin', 'libs/pagination.js', 'search.js'%}
+<script type='text/javascript' src="{{ ASSET_URL }}" charset="utf-8"></script>
+{% endassets %}
 {% endblock %}
 {% block body %}
 <div id="content" class="container container-fluid"> </div>
 <script charset="utf-8">
 $(document).ready(function(){
-    let tab = $("<table></table>", {
-        "id": 'search-results',
-        'class': 'display table table-striped table-bordered'})
-    $('#content').append(tab);
-    tab.DataTable({
-        data: commits,
-        order: [[ 0, "desc"]],
-        columns: [
-        {data: 'rank', title: "Rank"},
-        {data: 'preview', title: "Log",
-        "mRender": function(data, type, full){return "<a href=\"commits/"+full['cid']+"\">" + data;}},
-        {data: 'author', title: 'Author'},
-        {data: 'aut_date', title: "Authored Date"},
-        {data: 'com_date', title: 'Commit Date'}]});
-    });
+    let content = $('#content');
+    let paginator = $('<div></div>', {'class': 'text-center'});
+    let table = $('<div></div>');
+    content.append(table);
+    content.append(paginator);
+    let items = rankTrees(rootify(commits[0], commits[1]));
+    paginator.pagination({
+        'items': items.length,
+        'itemsOnPage': 5,
+        'listStyle': 'pagination',
+        onInit: () => {paginate_search(items, i => {drawTable(i, table);}, 0, 5)},
+        onPageClick: num => {table.html(''); paginate_search(items, i => {drawTable(i, table);}, num, 5)}
+        });
+});
 </script>
 {% endblock %}
