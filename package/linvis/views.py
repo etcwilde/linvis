@@ -9,9 +9,6 @@ from flask import session
 import linvis.searches
 import linvis.commit_page
 
-# TODO: remove me
-from flask import json
-
 @app.route('/artifact')
 def artifact():
     return render_template('artifact.html')
@@ -75,7 +72,6 @@ def search():
                 for r, m, c, a, ad, cd, p in results ]
 
             return render_template('search_results.html', results=(roots, results))
-            # return json.jsonify((roots, results))
         else:
             flash('"' + form.query.data + '" returned no results', 'info')
     return render_template('search.html', form=form)
