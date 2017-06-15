@@ -21,8 +21,6 @@ var request = function(req) {
         .always(req.notify);
 }
 
-// TODO: handle some caching
-
 /*
  * Get actions
  */

@@ -9,7 +9,6 @@ function BuildBubbleTree(data, treeRoot, pane, width, height, clickFunction, hov
         .value(function(d) { if (d.children != null) return d.children.length + 5; return 5;});
     let nodes = pack.nodes(data);
 
-
     var maxDepth = 0,
         view,
         focus;
@@ -44,11 +43,10 @@ function BuildBubbleTree(data, treeRoot, pane, width, height, clickFunction, hov
         .range(["hsl(212,100%,75%)", "hsl(212,100%,25%)"])
         .interpolate(d3.interpolateHcl);
 
-
     var svg = pane.append("svg")
         .attr("width", width)
         .attr("height", height)
-        .attr("class", "overlay"); // TODO: Call zoomListener
+        .attr("class", "overlay");
 
     var svgGroup = svg.append('g');
 

@@ -1,5 +1,5 @@
 FROM alpine:3.5
-# TODO: Make the server more secure and faster (switch to wsgi?)
+
 LABEL maintainer Evan Wilde <etcwilde@uvic.ca>
 # May 05, 2017
 
