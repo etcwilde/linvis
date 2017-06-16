@@ -6,7 +6,7 @@
 		<meta http-equiv="X-UA-Compatible" content="IE-edge,chrome=1"/>
 		<meta name="viewport" content="width=device-width, initial-scale=1"/>
 		<meta name="author" content="Evan Wilde"/>
-		<title>Linux Kernel</title>
+		<title>Linvis</title>
 		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
 
         <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
@@ -25,7 +25,7 @@
 		<nav class="navbar navbar-default navbar-fixed-top">
 			<div class="container">
 				<div class="navbar-header">
-					<a class="navbar-brand" href="/">Linux Kernel</a>
+					<a class="navbar-brand" href="/">Linvis</a>
 				</div>
 				<div class="pull-right">
 					<div class="navbar-form">
@@ -47,27 +47,19 @@
 
 		<div class="container container-fluid">
 			{% if category == "danger" %}
-			<div class="alert alert-danger alert-dismissible">
-				<button type="button" class="close" data-dismiss="alert" aria-label = "Close">
-					<span aria-hidden="true">&times;</span></button>
+			<div class="alert alert-danger">
 				<strong>Error:</strong> {{message}}
 			</div>
 			{% elif category == "warning" %}
-			<div class="alert alert-warning alert-dismissible">
-				<button type="button" class="close" data-dismiss="alert" aria-label = "Close">
-					<span aria-hidden="true">&times;</span></button>
+			<div class="alert alert-warning">
 				<strong>Warning:</strong> {{message}}
 			</div>
 			{% elif category == "success" %}
-			<div class="alert alert-success alert-dismissible">
-				<button type="button" class="close" data-dismiss="alert" aria-label = "Close">
-					<span aria-hidden="true">&times;</span></button>
+			<div class="alert alert-success">
 				<strong>Success:</strong> {{message}}
 			</div>
 			{% else %}
-			<div class="alert alert-info alert-dismissible">
-				<button type="button" class="close" data-dismiss="alert" aria-label = "Close">
-					<span aria-hidden="true">&times;</span></button>
+			<div class="alert alert-info">
 				<strong>Info:</strong> {{message}}
 			</div>
 			{% endif %}

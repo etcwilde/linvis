@@ -8,9 +8,28 @@
 -->
 
 {% block head %}
-<script src="/static/search.js"></script>
 {% if results %}<script>commits={{results|tojson|safe}};</script>{% endif %}
+{% assets output='gen/pagination.js', filters='jsmin', 'libs/pagination.js', 'search.js'%}
+<script type='text/javascript' src="{{ ASSET_URL }}" charset="utf-8"></script>
+{% endassets %}
 {% endblock %}
 {% block body %}
 <div id="content" class="container container-fluid"> </div>
+<script charset="utf-8">
+$(document).ready(function(){
+    let content = $('#content');
+    let paginator = $('<div></div>', {'class': 'text-center'});
+    let table = $('<div></div>');
+    content.append(table);
+    content.append(paginator);
+    let items = rankTrees(rootify(commits[0], commits[1]));
+    paginator.pagination({
+        'items': items.length,
+        'itemsOnPage': 5,
+        'listStyle': 'pagination',
+        onInit: () => {paginate_search(items, i => {drawTable(i, table);}, 0, 5)},
+        onPageClick: num => {table.html(''); paginate_search(items, i => {drawTable(i, table);}, num, 5)}
+        });
+});
+</script>
 {% endblock %}

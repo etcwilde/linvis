@@ -8,6 +8,13 @@ app = Flask(__name__)
 app.secret_key = os.urandom(24)
 assets = Environment(app)
 
+
+
+if 'DEBUG' in os.environ:
+    print("Debug Server")
+    # from werkzeug.contrib.profiler import ProfilerMiddleware
+    # app.wsgi_app = ProfilerMiddleware(app.wsgi_app)
+
 import linvis.views
 import linvis.data
 import linvis.database

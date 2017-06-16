@@ -1,67 +1,25 @@
 {% extends "heading.html" %}
 
 {% block body %}
-<div class="container container-fluid">
-	<form id="search-form" class="form">
-		{% if releases %}
-		<div class="form-group">
-			<label>Release</label>
-			<select name="version" class="form-control">
-				{% for release in releases %}
-				{% if release == version %}
-				<option selected="selected">{{release}}</option>
-				{% else %}
-				<option>{{release}}</option>
-				{% endif %}
-				{% endfor %}
-			</select>
-		</div>
-		{% endif %}
 
-		<!-- Commit date -->
-		<div class="form-group">
-			<label>Commit Date Range</label>
-			<div class="row">
-				<div class="col-lg-6">
-					<div class="input-group">
-						<span class="input-group-addon"> Begin Date </span>
-						<input name="commit_date_begin" type="text" class="form-control" placeholder="Begin Date (MM/DD/YYYY)">
-					</div>
-				</div>
-				<div class="col-lg-6">
-					<div class="input-group">
-						<span class="input-group-addon"> End Date </span>
-						<input name="commit_date_end" type="text" class="form-control" placeholder="End Date (MM/DD/YYYY)">
-					</div>
-				</div>
-			</div>
-		</div> <!-- /Commit Date -->
-	<div class="form-group">
-		<div class="row">
-			<div class="col-md-3">
-				<input name="search-text" type="text" class="form-control" placeholder="Search Text">
-			</div>
-			<div class="col-md-3">
-				<select name="search-type" id="search-type" class="selectpicker form-select form-control">
-					<option>Author</option>
-					<option>Commit ID</option>
-				<!--	<option>File Name</option> -->
-					<option>Log Keyword</option>
-				</select>
-			</div>
-			<div class="col-md-5">
-				<div class="checkbox">
-					<label>
-						<input name="merges" id="merge-box" type="checkbox">
-						Merges by Linus
-					</label>
-				</div>
-			</div>
-		</div>
-	</div>
-	<button class="btn btn-default" type="submit">
-		<i class="glyphicon glyphicon-search"></i> Search
-	</button>
-	</form>
+
+<div class="container container-fluid">
+    <form action="" method="post" class="form" accept-charset="utf-8">
+        {{form.hidden_tag()}}
+        <table>
+            <tr>
+                <td>{{form.query(size=100, class_="form-control")}}</td>
+                <td>
+                    <button class="btn btn-default" type="submit">
+                        <i class="glyphicon glyphicon-search"></i> Search
+                    </button>
+                </td>
+
+            </tr>
+        </table>
+    </form>
 </div>
+
+
+
 {% endblock %}
