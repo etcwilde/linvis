@@ -1,18 +1,245 @@
 {% extends "heading.html" %}
 
-{% block head %}
-<script src="/static/index.js"></script>
-{% endblock %}
-
 {% block navbar %}
 
 {% endblock %}
 
 {% block body %}
 
+{% assets filters='jsmin', output='gen/utils.min.js', 'utils/network.js', 'utils/processor.js', 'utils/spinner.js', 'utils/radix.js'%}
+<script type="text/javascript" src="{{ ASSET_URL }}" charset="utf-8"></script>
+{% endassets %}
+{% assets filters='jsmin', output='gen/view.min.js', 'ListTree.js', 'BubbleTree.js', 'ReinGoldTree.js', 'views.js' %}
+<script type="text/javascript" src="{{ ASSET_URL }}" charset="utf-8"></script>
+{% endassets %}
+{% assets filters='cssmin', output='gen/views.css', 'views.css'%}
+<link rel="stylesheet" href="{{ ASSET_URL }}" type="text/css" media="all" />
+{% endassets %}
+
+
 <div class="container container-fluid" id="content">
+
+    <h1>Linvis: Showing the Integration of Commits into Linux</h1>
+
+    <p>Linvis is a tool designed with the intention of showing the
+    concept behind the merge-tree, a structure that shows how a commit
+    is integrated into the master branch of a repository. Using the
+    merge-tree, we're able to create simple visualizations, filtering
+    out unrelated repository events and only showing what is
+    important.</p>
+
+    <p>All of the following examples show information about merge
+    <a href="commits/8eb88c80d444fd249edaa7d895666cde79e7b3b8">8eb88c80d444fd249edaa7d895666cde79e7b3b8</a>.</p>
+
+    <h2>Visualizations</h2>
+
+    <p>One of the primary goals behind the merge-tree model was drawing
+    clean visualizations. As such, we implemented three visualizations
+    into Linvis:<p>
+
+    <div>
+        <div class="row">
+            <div class="col-md-4">
+
+                <div class="thumbnail">
+                    <h3>List Tree</h3>
+                    <img src="static/images/list_tree.png"
+                    class="img-thumbnail center-block" alt="List Tree Visualization"/>
+
+                    <div class="caption">
+
+                        <p>The tree is represented by indented lists. Each
+                        item is a link to the corresponding commit.</p>
+
+                    </div>
+                </div>
+
+            </div>
+            <div class="col-md-4">
+
+                <div class="thumbnail">
+                    <h3>Pack Tree</h3>
+
+                    <div>
+                        <svg width="290" height="290"
+                            class="center-block overlay">
+                            <g transform="translate(2.5,2.5)">
+                            <circle class="node" fill="#fd6500" r="136.91379310344828" transform="translate(136.91379310344828,136.91379310344828)"></circle>
+                            <circle class="node" fill="#4779bf" r="62.07733268832794" transform="translate(62.07733268832796,136.91379310344828)"></circle>
+                            <circle class="node" fill="white" r="29.86017106932975" transform="translate(29.86017106932976,136.91379310344828)"></circle>
+                            <circle class="node" fill="white" r="29.86017106932975" transform="translate(94.29449430732615,136.91379310344828)"></circle>
+                            <circle class="node" fill="#4779bf" r="72.47946986545189" transform="translate(201.34811634144467,136.91379310344828)"></circle>
+                            <circle class="node" fill="white" r="29.86017106932975" transform="translate(169.13095472244646,164.81467350332971)"></circle>
+                            <circle class="node" fill="white" r="29.86017106932975" transform="translate(233.56527796044287,164.81467350332971)"></circle>
+                            <circle class="node" fill="white" r="29.86017106932975" transform="translate(201.34811634144467,109.01291270356685)"></circle>
+                            </g>
+                        </svg>
+                    </div>
+
+                    <div class="caption">
+
+                        <p>The tree is represented as nested sets. The root
+                        is the outer-most node containing all other nodes.
+                        The commits are the nodes containing no other
+                        nodes.</p>
+
+                    </div>
+
+                </div>
+
+
+            </div>
+            <div class="col-md-4">
+
+                <div class="thumbnail">
+
+                    <h3>Reingold-Tilford Tree</h3>
+
+                    <svg width="300" height="253.73371104815865" class="center-block overlay">
+                        <g transform="translate(-10.547176361083984,50),scale(1.1095694303512573,1.1095694303512573)">
+                        <g fill="none"><path stroke-width="1.2" stroke="#666" d="M139.28571428571428,0C139.28571428571428,38.75 64.28571428571428,38.75 64.28571428571428,77.5"></path></g>
+                        <g fill="none"><path stroke-width="1.2" stroke="#666" d="M139.28571428571428,0C139.28571428571428,38.75 214.28571428571428,38.75 214.28571428571428,77.5"></path></g>
+                        <g fill="none"><path stroke-width="1.2" stroke="#666" d="M64.28571428571428,77.5C64.28571428571428,116.25 42.857142857142854,116.25 42.857142857142854,155"></path></g>
+                        <g fill="none"><path stroke-width="1.2" stroke="#666" d="M64.28571428571428,77.5C64.28571428571428,116.25 85.71428571428571,116.25 85.71428571428571,155"></path></g>
+                        <g fill="none"><path stroke-width="1.2" stroke="#666" d="M214.28571428571428,77.5C214.28571428571428,116.25 171.42857142857142,116.25 171.42857142857142,155"></path></g>
+                        <g fill="none"><path stroke-width="1.2" stroke="#666" d="M214.28571428571428,77.5C214.28571428571428,116.25 214.28571428571428,116.25 214.28571428571428,155"></path></g>
+                        <g fill="none"><path stroke-width="1.2" stroke="#666" d="M214.28571428571428,77.5C214.28571428571428,116.25 257.1428571428571,116.25 257.1428571428571,155"></path></g>
+                        <circle class="node" fill="#fd6500" r="15" transform="translate(139.28571428571428,0)" style="stroke: rgb(71, 121, 191); stroke-width: 3;"></circle>
+                        <circle class="node" fill="#4779bf" r="15" transform="translate(64.28571428571428,77.5)" style="stroke: rgb(71, 121, 191); stroke-width: 1;"></circle>
+                        <circle class="node" fill="white" r="15" transform="translate(42.857142857142854,155)" style="stroke: rgb(0, 0, 0); stroke-width: 1;"></circle>
+                        <circle class="node" fill="white" r="15" transform="translate(85.71428571428571,155)" style="stroke: rgb(0, 0, 0); stroke-width: 1;"></circle>
+                        <circle class="node" fill="#003c80" r="15" transform="translate(214.28571428571428,77.5)" style="stroke: rgb(0, 60, 128); stroke-width: 1;"></circle>
+                        <circle class="node" fill="white" r="15" transform="translate(171.42857142857142,155)" style="stroke: rgb(0, 0, 0); stroke-width: 1;"></circle>
+                        <circle class="node" fill="white" r="15" transform="translate(214.28571428571428,155)" style="stroke: rgb(0, 0, 0); stroke-width: 1;"></circle>
+                        <circle class="node" fill="white" r="15" transform="translate(257.1428571428571,155)" style="stroke: rgb(0, 0, 0); stroke-width: 1;"></circle>
+                        </g>
+                    </svg>
+
+                    <div class="caption">
+
+                        <p>The tree is represented in the classic
+                        computer-science tree metaphor. The root is at the
+                        top with the children hanging below it. Commits are
+                        the leaves at the bottom.</p>
+
+                    </div>
+
+
+
+                </div>
+
+
+            </div>
+        </div>
+
+        In the Pack Tree and Reingold-Tilford tree visualizations, merges
+        are indicated in shades of blue, while the commits are white. The
+        pumpkin-orange indicates which node is currently selected. In all
+        three visualizations, the root is currently selected.
+
+    </div>
+    </p>
+
+    <h2>Summarization</h2>
+
+    <p>Linvis is able to provide aggregated summarizations of the
+    contents at a merge, listing information about the:
+    <ul>
+        <li>Author</li>
+        <li>Files</li>
+        <li>Modules</li>
+    </ul>
+
+
+    <div class="thumbnail">
+        <h3>Authors</h3>
+
+        <div id="author-table"></div>
+
+        <div class="caption">
+
+            <p>The authorship table shows an aggregated summarization of
+            the authors who contributed to a merge. We can see the
+            authors, the number of files they modified, the number of
+            lines added and removed, the sum, and the delta of the
+            changes they made. Expanding the drop-down shows details on
+            which files were modified, which commits made the changes to
+            the file, the lines added and removed, the total lines
+            changed, and the delta for each file.</p>
+
+        </div>
+    </div>
+
+    <div class="thumbnail">
+        <h3>Files</h3>
+        <div id="files-table"></div>
+
+        <div class="caption">
+
+            <p>The files table shows an aggregated summarization of the
+            files that were modified in a merge. We can see the file
+            name, the number of lines added to and removed from the
+            file, the sum of the line changes, and the difference.
+            Expanding the drop-down shows the commit(s) that made the
+            changes.</p>
+
+        </div>
+    </div>
+
+    <div class="thumbnail">
+        <h3>Modules</h3>
+        <div id="modules-table"></div>
+
+        <div class="caption">
+
+            <p>Modules are a concept that is specific to the Linux
+            kernel design. The commit log subject contains information
+            about which subsystem to which it belongs. The content up to
+            the first colon indicates where changes are being made. For
+            example <code>ALSA: Fix debugfs_create_dir's error checking
+                method for sound/soc/</code> modifies a component of
+            ALSA, the sound server in Linux. This table shows an
+            aggregated view of which modules are modified by the commits
+            in a merge. The details drop-down provides a listing of the
+            commits that make the changes.</p>
+
+        </div>
+    </div>
+
+    <h2>Search</h2>
+
+    <p>Linvis support searching for commits using full-text searching.
+    It takes into account the commit hash, keywords from the commit log
+    subject and log body, the author name, the committed and authored
+    date, and the file names. Entering information into this field will
+    filter out the repository events that do not have any relevance to
+    any attribute. If you know exactly which commit to navigate to, it
+    is best to use the commit hash, as it will be the only one showing.
+    Providing conflicting information will likely result in no results
+    being returned.</p>
+
+    <p>The search results are grouped by the integrating merge, which is
+    the root the of the merge trees. The commit groups are arranged
+    according to the relevance of the contents of the group.</p>
+
+    <p>Click the <a href="/search" class="btn btn-default"><i
+            class="glyphicon glyphicon-search"></i> Search</a> button in
+    the top bar to access the search feature.</p>
+
 </div>
 
+<div class="footer container-1g padding-x-3" role=contentinfo>
+    <div class="position-relative d-flex flex-justify-between py-6 margin-top-6 font-6 text-gray border-top">
+        <ul class="margin-top-6 margin-bottom-6 list-inline">
+            <li class="margin-right-3"><a href="https://web.uvic.ca/~etcwilde" target="_blank">Evan Wilde</a> 2017</li>
+            <li class="margin-right-3"><a href="https://www.uvic.ca/" target="_blank">University of Victoria</a></li>
+            <li class="margin-right-3"><a href="http://ieeexplore.ieee.org/document/7780151/" target="_blank">Merge-Tree</a></li>
+        </ul>
+    </div>
+</div>
+
+<script charset="utf-8">
+var cid = "8eb88c80d444fd249edaa7d895666cde79e7b3b8"; getTree(cid, function(t) { getAuthors(cid, function(authors) { processAuthors(t, authors, function(a) { drawAuthors(a, $('#author-table'))}) }) }); getFiles(cid, function(files){processFiles(files, function(f){drawFiles(f, $("#files-table"));});}); getModules(cid, function(mods){ processModules(mods, function(m){ drawModules(m, $('#modules-table'))})});
+</script>
+
 {% endblock %}
-
-

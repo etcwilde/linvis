@@ -78,5 +78,6 @@ def search():
 
 
 @app.route('/')
+@app.route('/index')
 def index():
-    return redirect(url_for('search'))
+    return render_template('index.html')
