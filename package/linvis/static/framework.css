@@ -1,0 +1,41 @@
+.position-relative {
+	position: relative !important;
+}
+
+.flex-justify-between {
+	-webkit-box-pack: justify !important;
+	justify-content: space-between !important;
+}
+
+.text-gray {
+	color #586069 !important;
+}
+
+.border-top {
+	border-top: 1px #e1e4e8 solid !important;
+}
+
+.margin-top-6 {
+	margin-top: 40px !important;
+}
+
+.margin-top-3 {
+	margin-top: 16px !important;
+}
+
+.margin-bottom-6 {
+	margin-bottom: 40px !important;
+}
+
+.margin-right-3 {
+	margin-right: 16px !important;
+}
+
+.font-6 {
+	font-size: 12px !important;
+}
+
+.padding-x-3 {
+	padding-right: 16px !important;
+	padding-left: 16px !important;
+}
