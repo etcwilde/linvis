@@ -2,7 +2,6 @@
 
 {% block body %}
 
-
 <div class="container container-fluid">
     <form action="" method="post" class="form" accept-charset="utf-8">
         {{form.hidden_tag()}}
@@ -14,12 +13,158 @@
                         <i class="glyphicon glyphicon-search"></i> Search
                     </button>
                 </td>
-
             </tr>
         </table>
     </form>
 </div>
 
+<div class="container">
+
+    <div class="row">
+
+        <div class="col-sm-4">
+
+            <h3>Filters</h3>
+            <div class="thumbnail">
+                <h4>Author Name</h4>
+
+                <p>Simply enter the name of the author that you
+                are looking for. All results for this author
+                will appear.</p>
+
+                <p>Searching for <code>Takashi Iwai</code> will return
+                the commits that were authored by Takashi, or where his
+                name shows up in the log message.</p>
+            </div>
+
+            <div class="thumbnail">
+                <h4>Commit Hash</h4>
+
+                <p>Enter the 40-character commit hash if you
+                have it. Only that commit will be returned in
+                the results.</p>
+
+
+                <p>Searching for
+                <code>8eb88c80d444fd249edaa7d895666cde79e7b3b8</code>
+                will return a single item, the merge with this commit
+                hash.</p>
+            </div>
+
+            <div class="thumbnail">
+                <h4>File Name</h4>
+
+                <p>Enter the names of the files that you want to
+                investigate.</p>
+
+                <p>Searching for <code>arch/arm/common/Makefile</code>
+                will return commits that work with this file. The
+                commits may also work with other files.
+                </p>
+            </div>
+
+            <div class="thumbnail">
+                <h4>Keywords</h4>
+
+                <p>Searching by keywords from the commit log can return
+                results. Searching for <code>loop: handle on-demand
+                    devices correctly</code> will return the commit with
+                these terms in the log.</p>
+
+            </div>
+
+            <div class="thumbnail">
+                <h4>Dates</h4>
+
+                <p>Dates are taken into account when searching for
+                commits. Searching for <code>2011</code> will return
+                results that contain </p>
+            </div>
+
+        </div>
+
+        <div class="col-md-6">
+            <h3>Examples</h3>
+
+            The filters can be combined to further remove results from
+            the pool.
+
+            The query <code>David Miller 2011</code> will only return
+            commits that have David Miller and 2011 occurring somewhere
+            in the author list, logs, and date.
+
+            <div class="thumbnail">
+
+                <code>3f17ea6dea8ba5668873afa54628a91aaa3fb1c0</code>
+
+                <div class="caption">
+                    <p>This is the largest merge in the database, merging
+                    6809 individual commits, with 7217 total repository
+                    events. This merge-tree works with the networking
+                    component of the kernel.</p>
+                </div>
+            </div>
+
+            <div class="thumbnail">
+
+                <code>Andrew Morton mm 2011</code>
+
+                <div class="caption">
+                    <p>Captures the commits and merges that involve
+                    Andrew Morton and the memory module of the kernel.
+                    Most of the results are authored or committed in
+                    2011, though some are not, and only have a textual
+                    reference to 2011 in the commit log.
+                    </p>
+                </div>
+            </div>
+
+            <div class="thumbnail">
+
+                <code>8eb88c80d444fd249edaa7d895666cde79e7b3b8 2010</code>
+
+                <div class="caption">
+                    This query will not return any results since the
+                    commit with this hash was written in 2008 and has no
+                    references to 2010.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row margin-bottom-6">
+
+        <div class="col-md-10">
+
+            <h3>Limitations</h3>
+
+            <p>The search terms must match the term in the commit
+            verbatim for that commit to be identified. This means that
+            if the commit has a typo in the log and you want that commit
+            to show up, you must search using that typo. It also means
+            that if you are searching by commit hash, the entire 40
+            characters of the commit hash must be used in the query.</p>
+
+            <p>All search terms must apply to every commit selected.
+            Querying for "2011" and "2007", will only return the commits
+            that have both 2011 AND 2007 somewhere in either the
+            authorship date, the committed date, or in the log.</p>
+
+            <p>The engine uses a bag-of-words representation for the
+            commits. It strips whitespaces, stop-words, and punctuations
+            from both queries and commit metadata. This has the most
+            impact on dates since it won't be able to differentiate
+            <code>2011-04-05</code> from <code>2011-05-04</code>.
+            </p>
+
+            <p class="font-6">Note: These are limitations in the implementation of the
+            search engine, not the merge-tree design.</p>
+        </div>
+    </div>
+</div>
+
+
+</div>
 
 
 {% endblock %}
